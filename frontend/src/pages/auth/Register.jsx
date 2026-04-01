@@ -1,56 +1,102 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '../../services/supabase';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const navigate = useNavigate();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name
+        }
+      }
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+    } else {
+      setSuccessMsg('Successfully created account! Redirecting...');
+      setTimeout(() => navigate('/dashboard'), 2000);
+    }
+    setLoading(false);
+  };
+
+  const handleOAuth = async (provider) => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    if (error) setErrorMsg(error.message);
+  };
 
   return (
     <div className="flex min-h-screen bg-black">
-      {/* Left Form Area */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 shadow-none transition-none">
           
-          {/* Logo / Brand Placeholder */}
           <div className="mb-8 flex justify-center text-center">
             <h1 className="text-3xl md:text-4xl font-medium text-white tracking-heading">UV Netware Accounting Utilities</h1>
           </div>
 
-          <form className="space-y-6">
-            
-            {/* Name Input */}
+          {errorMsg && (
+            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
+              {errorMsg}
+            </div>
+          )}
+          {successMsg && (
+            <div className="mb-6 p-4 border-[1.75px] border-success bg-black text-success text-sm text-center">
+              {successMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-white tracking-heading">
-                Your Name
-              </label>
+              <label className="block text-sm font-medium text-white tracking-heading">Your Name</label>
               <input 
                 type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. John Doe" 
+                required
                 className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
               />
             </div>
 
-            {/* Email Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-white tracking-heading">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-white tracking-heading">Email</label>
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email" 
+                required
                 className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
               />
             </div>
 
-            {/* Password Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-white tracking-heading">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-white tracking-heading">Password</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a strong password" 
+                  required
                   className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
                 />
                 <button 
@@ -63,12 +109,12 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase"
+              disabled={loading}
+              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
             >
-              Sign Up
+              {loading ? 'Registering...' : 'Sign Up'}
             </button>
           </form>
 
@@ -79,25 +125,22 @@ const Register = () => {
           </div>
 
           <div className="flex flex-col space-y-4 mb-8">
-            <button type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
+            <button onClick={() => handleOAuth('google')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
                Google
             </button>
-            <button type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
+            <button onClick={() => handleOAuth('github')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
                GitHub
             </button>
           </div>
 
           <div className="text-center text-sm md:text-base">
             <span className="text-grayText">Already have an account? </span>
-            <Link to="/login" className="text-white hover:underline transition-none font-medium">
-              Sign In
-            </Link>
+            <Link to="/login" className="text-white hover:underline transition-none font-medium">Sign In</Link>
           </div>
 
         </div>
       </div>
 
-      {/* Right Promotional Area - Desktop Only */}
       <div className="hidden lg:flex lg:w-1/2 bg-black border-l-[1.75px] border-borderDark items-center justify-center p-12 relative overflow-hidden">
          <div className="max-w-2xl z-10 text-center flex flex-col items-center">
             <div className="w-24 h-24 border-[1.75px] border-accent rounded-full mb-8 flex items-center justify-center bg-naviBlue">
@@ -110,7 +153,6 @@ const Register = () => {
               Step into the future of accounting. Define your business settings and invite stakeholders safely right after signing up.
             </p>
          </div>
-         {/* Minimal decorative element strictly adhering to rules */}
          <div className="absolute top-0 right-0 w-full h-1 bg-accent"></div>
       </div>
     </div>
