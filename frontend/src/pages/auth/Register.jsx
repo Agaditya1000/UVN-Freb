@@ -6,6 +6,7 @@ import { supabase } from '../../services/supabase';
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
+  const [role, setRole] = useState('Owner');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,8 @@ const Register = () => {
       password,
       options: {
         data: {
-          full_name: name
+          full_name: name,
+          role: role
         }
       }
     });
@@ -74,6 +76,24 @@ const Register = () => {
                 required
                 className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white tracking-heading">Your Role</label>
+              <div className="relative">
+                <select 
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite focus:outline-none focus:border-accent transition-none appearance-none"
+                >
+                  <option value="Owner">Owner</option>
+                  <option value="Accountant">Accountant</option>
+                  <option value="Viewer">Viewer</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-grayText">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
