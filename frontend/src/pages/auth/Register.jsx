@@ -132,7 +132,7 @@ const Register = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
+              className="w-full p-4 font-medium tracking-wider text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none flex justify-center items-center"
             >
               {loading ? 'Registering...' : 'Sign Up'}
             </button>
@@ -145,10 +145,10 @@ const Register = () => {
           </div>
 
           <div className="flex flex-col space-y-4 mb-8">
-            <button onClick={() => handleOAuth('google')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
+            <button onClick={() => handleOAuth('google')} type="button" className="w-full p-4 font-medium tracking-wider text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none flex justify-center items-center">
                Google
             </button>
-            <button onClick={() => handleOAuth('github')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
+            <button onClick={() => handleOAuth('github')} type="button" className="w-full p-4 font-medium tracking-wider text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none flex justify-center items-center">
                GitHub
             </button>
           </div>
