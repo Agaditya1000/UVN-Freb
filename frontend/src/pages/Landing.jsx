@@ -1,24 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Landmark, Shield, Zap, BarChart } from 'lucide-react';
 
 const features = [
   {
-    icon: '🏦',
+    icon: <Landmark size={32} color="#00BFA5" />,
     title: 'Multi-Standard Compliance',
     desc: 'GAAP, IFRS, and IND-AS/GST support out of the box for global operations.',
   },
   {
-    icon: '🔐',
+    icon: <Shield size={32} color="#00BFA5" />,
     title: 'Role-Based Access',
     desc: 'Granular permissions for Owners, Accountants, and Viewers — no over-exposure.',
   },
   {
-    icon: '⚡',
+    icon: <Zap size={32} color="#00BFA5" />,
     title: 'Real-Time Sync',
     desc: 'Changes propagate instantly across your team with zero config required.',
   },
   {
-    icon: '📊',
+    icon: <BarChart size={32} color="#00BFA5" />,
     title: 'Smart Reporting',
     desc: 'Generate audit-ready reports with a single click. Export to PDF or Excel.',
   },
@@ -26,60 +27,37 @@ const features = [
 
 function Landing() {
   return (
-    <div
-      style={{ background: 'var(--surface)', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}
-      className="text-lightWhite overflow-hidden relative"
-    >
-      {/* Background grid */}
+    <div className="text-lightWhite overflow-hidden relative" style={{ minHeight: '100vh', background: '#000000' }}>
+      
       <div className="grid-overlay absolute inset-0 pointer-events-none" />
 
-      {/* Glow orbs */}
-      <div
-        className="orb"
-        style={{ width: 500, height: 500, background: 'rgba(0,191,165,0.12)', top: -120, left: -100 }}
-      />
-      <div
-        className="orb"
-        style={{ width: 400, height: 400, background: 'rgba(0,100,180,0.08)', top: 200, right: -100 }}
-      />
-
-      {/* ── Nav ─────────────────────────────────── */}
       <nav className="relative z-10 flex justify-between items-center px-8 py-5">
         <div className="flex items-center gap-3">
           <div
+            className="flex items-center justify-center font-medium text-white"
             style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'linear-gradient(135deg, #00BFA5, #00897B)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, color: '#000', fontSize: 14, letterSpacing: '-0.02em',
+              background: '#0000EE',
+              fontSize: 14, letterSpacing: '-0.75px',
             }}
           >
             UV
           </div>
-          <span style={{ fontWeight: 700, fontSize: 16, color: '#fff', letterSpacing: '-0.02em' }}>
+          <span style={{ fontWeight: 500, fontSize: 16, color: '#FFFFFF', letterSpacing: '-0.75px' }}>
             UVN <span style={{ color: '#00BFA5' }}>SaaS</span>
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="btn-ghost"
-            style={{ padding: '0.5rem 1.2rem', fontSize: 14 }}
-          >
+          <Link to="/login" className="btn-ghost" style={{ fontSize: 14 }}>
             Sign In
           </Link>
-          <Link
-            to="/signup"
-            className="btn-primary"
-            style={{ padding: '0.5rem 1.2rem', fontSize: 14 }}
-          >
-            Get Started →
+          <Link to="/signup" className="btn-primary" style={{ fontSize: 14 }}>
+            Get Started
           </Link>
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────────────── */}
       <section
         className="relative z-10 flex flex-col items-center justify-center text-center"
         style={{ paddingTop: '5rem', paddingBottom: '5rem', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
@@ -93,28 +71,20 @@ function Landing() {
           className="anim-fade-up anim-delay-1"
           style={{
             fontSize: 'clamp(2.6rem, 6vw, 4.5rem)',
-            fontWeight: 800,
-            lineHeight: 1.1,
-            letterSpacing: '-0.04em',
+            fontWeight: 500,
+            lineHeight: 'normal',
+            letterSpacing: '-0.75px',
             maxWidth: 780,
             marginBottom: '1.5rem',
+            color: '#FFFFFF'
           }}
         >
-          Accounting built for{' '}
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #00BFA5 0%, #4dd0e1 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            modern teams
-          </span>
+          Accounting built for modern teams
         </h1>
 
         <p
           className="anim-fade-up anim-delay-2"
-          style={{ maxWidth: 560, fontSize: '1.1rem', color: 'rgba(238,238,238,0.65)', lineHeight: 1.7, marginBottom: '2.5rem' }}
+          style={{ maxWidth: 560, fontSize: '1.1rem', color: '#EEEEEE', lineHeight: 'normal', marginBottom: '2.5rem', fontWeight: 300 }}
         >
           Manage documents, databases, and compliance workflows — all in one
           secure, role-aware platform designed for finance teams.
@@ -122,19 +92,18 @@ function Landing() {
 
         <div className="flex gap-4 flex-wrap justify-center anim-fade-up anim-delay-3">
           <Link to="/signup" className="btn-primary" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
-            Start for free →
+            Start for free
           </Link>
           <Link to="/login" className="btn-ghost" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
             Sign in
           </Link>
         </div>
 
-        {/* Stats strip */}
         <div
-          className="glass anim-fade-up anim-delay-4"
+          className="panel anim-fade-up anim-delay-4"
           style={{
             display: 'flex', gap: '3rem', marginTop: '4rem',
-            padding: '1.2rem 2.5rem', borderRadius: 16,
+            padding: '1.2rem 2.5rem', borderRadius: 0,
             flexWrap: 'wrap', justifyContent: 'center',
           }}
         >
@@ -145,24 +114,23 @@ function Landing() {
             { value: '< 1s', label: 'Sync Speed' },
           ].map((s) => (
             <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, fontSize: '1.35rem', color: '#00BFA5', letterSpacing: '-0.02em' }}>{s.value}</div>
-              <div style={{ fontSize: '0.78rem', color: 'rgba(238,238,238,0.5)', marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontWeight: 500, fontSize: '1.35rem', color: '#00BFA5', letterSpacing: '-0.75px' }}>{s.value}</div>
+              <div style={{ fontSize: '0.8rem', color: '#757575', marginTop: 4, fontWeight: 300 }}>{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Features ─────────────────────────────── */}
       <section
         className="relative z-10"
         style={{ maxWidth: 1100, margin: '0 auto', padding: '4rem 1.5rem' }}
       >
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <div className="teal-badge" style={{ marginBottom: '1rem', display: 'inline-flex' }}>Features</div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', marginBottom: '0.75rem' }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', marginBottom: '0.75rem', fontWeight: 500, color: '#FFFFFF', letterSpacing: '-0.75px' }}>
             Everything your finance team needs
           </h2>
-          <p style={{ color: 'rgba(238,238,238,0.55)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
+          <p style={{ color: '#EEEEEE', maxWidth: 480, margin: '0 auto', lineHeight: 'normal', fontWeight: 300 }}>
             From compliance to real-time collaboration, UVN SaaS is built around the way modern accounting teams operate.
           </p>
         </div>
@@ -177,82 +145,75 @@ function Landing() {
           {features.map((f, i) => (
             <div
               key={f.title}
-              className={`glass anim-fade-up anim-delay-${i + 1}`}
+              className={`panel anim-fade-up anim-delay-${i % 5 + 1}`}
               style={{
-                borderRadius: 16, padding: '1.75rem',
-                transition: 'border-color 0.2s, transform 0.2s',
+                borderRadius: 0, padding: '1.75rem', border: '1.75px solid #000055',
+                transition: 'transform 0.2s',
                 cursor: 'default',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0,191,165,0.35)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--glass-border)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <div style={{ fontSize: '1.8rem', marginBottom: '0.85rem' }}>{f.icon}</div>
-              <div style={{ fontWeight: 600, color: '#fff', marginBottom: '0.5rem', fontSize: '1rem' }}>{f.title}</div>
-              <div style={{ color: 'rgba(238,238,238,0.55)', fontSize: '0.88rem', lineHeight: 1.65 }}>{f.desc}</div>
+              <div style={{ marginBottom: '0.85rem' }}>{f.icon}</div>
+              <div style={{ fontWeight: 500, color: '#FFFFFF', marginBottom: '0.5rem', fontSize: '1rem', letterSpacing: '-0.75px' }}>{f.title}</div>
+              <div style={{ color: '#EEEEEE', fontSize: '0.9rem', lineHeight: 'normal', fontWeight: 300 }}>{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── CTA Banner ───────────────────────────── */}
       <section
         className="relative z-10"
         style={{ maxWidth: 900, margin: '0 auto 6rem', padding: '0 1.5rem' }}
       >
         <div
-          className="glass"
+          className="panel"
           style={{
-            borderRadius: 20,
+            borderRadius: 0,
             padding: '3.5rem 2.5rem',
             textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(0,191,165,0.08) 0%, rgba(0,100,180,0.05) 100%)',
-            borderColor: 'rgba(0,191,165,0.2)',
+            background: '#000021',
+            border: '1.75px solid #000055',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          <div
-            className="orb"
-            style={{ width: 300, height: 300, background: 'rgba(0,191,165,0.12)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
-          />
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <h2 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', marginBottom: '1rem', color: '#FFFFFF', fontWeight: 500, letterSpacing: '-0.75px' }}>
               Ready to modernize your accounting?
             </h2>
-            <p style={{ color: 'rgba(238,238,238,0.6)', marginBottom: '2rem', lineHeight: 1.7 }}>
+            <p style={{ color: '#EEEEEE', marginBottom: '2rem', lineHeight: 'normal', fontWeight: 300 }}>
               Join forward-thinking finance teams who trust UVN SaaS to keep their books clean and compliant.
             </p>
             <Link to="/signup" className="btn-primary" style={{ fontSize: '1rem', padding: '0.9rem 2.2rem' }}>
-              Create free account →
+              Create free account
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────── */}
       <footer
         className="relative z-10"
         style={{
-          borderTop: '1px solid var(--glass-border)',
+          borderTop: '1.75px solid #000055',
           padding: '1.5rem 2rem',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           flexWrap: 'wrap', gap: '0.75rem',
+          background: '#000000'
         }}
       >
-        <span style={{ color: 'rgba(238,238,238,0.35)', fontSize: '0.82rem' }}>
-          © 2025 UVN SaaS. All rights reserved.
+        <span style={{ color: '#757575', fontSize: '0.9rem', fontWeight: 300 }}>
+          © 2026 UVN SaaS. All rights reserved.
         </span>
         <div style={{ display: 'flex', gap: '1.5rem' }}>
           {['Privacy', 'Terms', 'Contact'].map((l) => (
-            <a key={l} href="#" style={{ color: 'rgba(238,238,238,0.4)', fontSize: '0.82rem', textDecoration: 'none' }}
-              onMouseEnter={(e) => (e.target.style.color = '#00BFA5')}
-              onMouseLeave={(e) => (e.target.style.color = 'rgba(238,238,238,0.4)')}
+            <a key={l} href="#" style={{ color: '#757575', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 300 }}
+              onMouseEnter={(e) => (e.target.style.color = '#FFFFFF')}
+              onMouseLeave={(e) => (e.target.style.color = '#757575')}
             >{l}</a>
           ))}
         </div>
