@@ -61,6 +61,7 @@
 
 /* ─── Base reset ────────────────────────────── */
 @layer base {
+<<<<<<< HEAD
   * { box-sizing: border-box; }
 
   html { scroll-behavior: smooth; }
@@ -68,6 +69,20 @@
   body {
     background: var(--bg);
     color: var(--text);
+=======
+  * {
+    box-sizing: border-box;
+    box-shadow: none !important; /* No shadows ever */
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #000000;
+    color: #EEEEEE;
+>>>>>>> Anshu_Raj
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     line-height: normal;
@@ -77,15 +92,27 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
+<<<<<<< HEAD
     color: var(--heading);
     letter-spacing: -0.75px;
   }
 
   input, select, textarea { font-family: 'Roboto', sans-serif; }
+=======
+    color: #FFFFFF;
+    letter-spacing: -0.75px;
+    line-height: normal;
+  }
+
+  input, select, textarea {
+    font-family: 'Roboto', sans-serif;
+  }
+>>>>>>> Anshu_Raj
 }
 
 /* ─── Utility components ────────────────────── */
 @layer components {
+<<<<<<< HEAD
   .glass {
     background: var(--card-bg);
     border: var(--border-width) solid var(--border);
@@ -161,18 +188,51 @@
     background: var(--bg-2);
   }
 
+=======
+  .panel {
+    background: #000021;
+    border: 1.75px solid #000055;
+  }
+
+  .btn-primary, .btn-ghost {
+    background: transparent;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    border-radius: 145px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-primary:hover, .btn-ghost:hover {
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+>>>>>>> Anshu_Raj
   .teal-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+<<<<<<< HEAD
     background: var(--bg-2);
     border: var(--border-width) solid var(--teal);
     color: var(--teal);
+=======
+    background: transparent;
+    border: 1.75px solid #00BFA5;
+    color: #00BFA5;
+>>>>>>> Anshu_Raj
     font-size: 0.78rem;
     font-weight: 500;
     padding: 0.3rem 0.75rem;
     border-radius: 999px;
-    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   /* Theme toggle pill */
@@ -197,6 +257,7 @@
   }
 }
 
+<<<<<<< HEAD
 /* ─── Animations ────────────────────────────── */
 @keyframes fadeUp  { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
@@ -225,4 +286,24 @@
   border-radius: 50%;
   filter: blur(80px);
   pointer-events: none;
+=======
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-up   { animation: fadeUp 0.6s ease both; }
+.anim-delay-1   { animation-delay: 0.1s; }
+.anim-delay-2   { animation-delay: 0.2s; }
+.anim-delay-3   { animation-delay: 0.3s; }
+.anim-delay-4   { animation-delay: 0.4s; }
+.anim-delay-5   { animation-delay: 0.5s; }
+
+.grid-overlay {
+  background-image:
+    linear-gradient(#000055 1px, transparent 1px),
+    linear-gradient(90deg, #000055 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.1;
+>>>>>>> Anshu_Raj
 }
