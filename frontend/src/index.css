@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,54 +7,56 @@
 /* ─── Dark theme (default) ──────────────────── */
 :root,
 [data-theme="dark"] {
-  --bg:           #0a0a0f;
-  --bg-2:         #111118;
-  --surface:      rgba(255,255,255,0.04);
-  --border:       rgba(255,255,255,0.08);
-  --border-hover: rgba(0,191,165,0.35);
+  --bg:           #000000;
+  --bg-2:         #000021;
+  --surface:      #000021;
+  --border:       #000055;
+  --border-hover: #0000EE;
   --text:         #EEEEEE;
-  --text-muted:   rgba(238,238,238,0.55);
-  --text-faint:   rgba(238,238,238,0.35);
-  --heading:      #ffffff;
+  --text-muted:   #757575;
+  --text-faint:   #757575;
+  --heading:      #FFFFFF;
   --teal:         #00BFA5;
-  --teal-dim:     rgba(0,191,165,0.15);
+  --teal-dim:     #000021;
   --teal-glow:    rgba(0,191,165,0.35);
-  --error:        #ef4444;
-  --input-bg:     rgba(255,255,255,0.04);
-  --input-border: rgba(255,255,255,0.1);
-  --card-bg:      rgba(255,255,255,0.04);
+  --error:        #D50000;
+  --input-bg:     #000000;
+  --input-border: #000055;
+  --card-bg:      #000021;
   --orb-1:        rgba(0,191,165,0.12);
-  --orb-2:        rgba(0,100,180,0.08);
-  --toggle-bg:    rgba(255,255,255,0.08);
+  --orb-2:        rgba(0,0,238,0.08); /* accent glow */
+  --toggle-bg:    #000055;
   --toggle-icon:  #FFD700;       /* moon colour */
   --naviBlue:     #000021;
   --form-bg:      #000021;
+  --border-width: 1.75px;
 }
 
 /* ─── Light theme ───────────────────────────── */
 [data-theme="light"] {
-  --bg:           #f5f7fa;
-  --bg-2:         #edf0f5;
-  --surface:      rgba(0,0,0,0.03);
-  --border:       rgba(0,0,0,0.1);
-  --border-hover: rgba(0,150,130,0.4);
-  --text:         #1a1a2e;
-  --text-muted:   rgba(26,26,46,0.6);
-  --text-faint:   rgba(26,26,46,0.4);
-  --heading:      #0d0d1a;
-  --teal:         #00897B;
-  --teal-dim:     rgba(0,137,123,0.12);
-  --teal-glow:    rgba(0,137,123,0.3);
-  --error:        #dc2626;
-  --input-bg:     rgba(0,0,0,0.04);
-  --input-border: rgba(0,0,0,0.15);
-  --card-bg:      rgba(255,255,255,0.7);
+  --bg:           #FFFFFF;
+  --bg-2:         #EEEEEE;
+  --surface:      #FFFFFF;
+  --border:       #000055;
+  --border-hover: #0000EE;
+  --text:         #000000;
+  --text-muted:   #757575;
+  --text-faint:   #757575;
+  --heading:      #000021;
+  --teal:         #00BFA5;
+  --teal-dim:     #EEEEEE;
+  --teal-glow:    rgba(0,191,165,0.3);
+  --error:        #D50000;
+  --input-bg:     #FFFFFF;
+  --input-border: #000055;
+  --card-bg:      #EEEEEE;
   --orb-1:        rgba(0,191,165,0.08);
-  --orb-2:        rgba(0,100,200,0.06);
-  --toggle-bg:    rgba(0,0,0,0.06);
+  --orb-2:        rgba(0,0,238,0.06);
+  --toggle-bg:    #EEEEEE;
   --toggle-icon:  #f59e0b;       /* sun colour */
   --naviBlue:     #e8edf5;
-  --form-bg:      #ffffff;
+  --form-bg:      #FFFFFF;
+  --border-width: 1.75px;
 }
 
 /* ─── Base reset ────────────────────────────── */
@@ -66,35 +68,36 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Roboto', sans-serif;
     font-weight: 300;
+    line-height: normal;
     -webkit-font-smoothing: antialiased;
     transition: background 0.25s ease, color 0.25s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--heading);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.75px;
   }
 
-  input, select, textarea { font-family: 'Inter', sans-serif; }
+  input, select, textarea { font-family: 'Roboto', sans-serif; }
 }
 
 /* ─── Utility components ────────────────────── */
 @layer components {
   .glass {
     background: var(--card-bg);
-    border: 1px solid var(--border);
+    border: var(--border-width) solid var(--border);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     transition: background 0.25s ease, border-color 0.25s ease;
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, var(--teal) 0%, #00897B 100%);
+    background: var(--teal);
     color: #000;
-    font-weight: 600;
+    font-weight: 500;
     padding: 0.75rem 1.5rem;
     border-radius: 10px;
     transition: all 0.2s ease;
@@ -105,6 +108,7 @@
     justify-content: center;
     text-decoration: none;
     cursor: pointer;
+    border: var(--border-width) solid var(--teal);
   }
   .btn-primary::after {
     content: '';
@@ -125,7 +129,7 @@
     font-weight: 500;
     padding: 0.75rem 1.5rem;
     border-radius: 10px;
-    border: 1px solid var(--border);
+    border: var(--border-width) solid var(--border);
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
@@ -135,35 +139,34 @@
   }
   .btn-ghost:hover {
     background: var(--surface);
-    border-color: rgba(255,255,255,0.15);
+    border-color: var(--border-hover);
     transform: translateY(-1px);
   }
 
   .input-field {
     width: 100%;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: var(--border-width) solid var(--input-border);
     border-radius: 10px;
     padding: 0.75rem 1rem;
     color: var(--text);
     font-size: 0.95rem;
     transition: all 0.2s ease;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Roboto', sans-serif;
   }
   .input-field::placeholder { color: var(--text-faint); }
   .input-field:focus {
     outline: none;
-    border-color: var(--teal);
-    background: var(--teal-dim);
-    box-shadow: 0 0 0 3px var(--teal-dim);
+    border-color: var(--border-hover);
+    background: var(--bg-2);
   }
 
   .teal-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--teal-dim);
-    border: 1px solid rgba(0,191,165,0.3);
+    background: var(--bg-2);
+    border: var(--border-width) solid var(--teal);
     color: var(--teal);
     font-size: 0.78rem;
     font-weight: 500;
@@ -181,15 +184,15 @@
     height: 38px;
     border-radius: 50%;
     background: var(--toggle-bg);
-    border: 1px solid var(--border);
+    border: var(--border-width) solid var(--border);
     cursor: pointer;
     font-size: 1.1rem;
     transition: all 0.2s ease;
     flex-shrink: 0;
   }
   .theme-toggle:hover {
-    background: var(--teal-dim);
-    border-color: var(--teal);
+    background: var(--surface);
+    border-color: var(--border-hover);
     transform: rotate(15deg) scale(1.08);
   }
 }
@@ -212,8 +215,8 @@
 /* ─── Helpers ───────────────────────────────── */
 .grid-overlay {
   background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    linear-gradient(var(--border) 1.75px, transparent 1.75px),
+    linear-gradient(90deg, var(--border) 1.75px, transparent 1.75px);
   background-size: 60px 60px;
 }
 

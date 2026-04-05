@@ -13,7 +13,7 @@ function Landing() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "'Roboto', sans-serif" }}
       className="text-[var(--text)] overflow-hidden relative transition-colors duration-300">
 
       {/* Background grid */}
@@ -30,8 +30,8 @@ function Landing() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 700, color: '#000', fontSize: 14,
           }}>UV</div>
-          <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--heading)', letterSpacing: '-0.02em' }}>
-            UVN <span style={{ color: 'var(--teal)' }}>SaaS</span>
+          <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--heading)' }}>
+            UV Netware <span style={{ color: 'var(--teal)' }}>Accounting Utilities</span>
           </span>
         </div>
 
@@ -103,7 +103,7 @@ function Landing() {
             Everything your finance team needs
           </h2>
           <p style={{ color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-            From compliance to real-time collaboration, UVN SaaS is built around the way modern accounting teams operate.
+            From compliance to real-time collaboration, UV Netware Accounting Utilities is built around the way modern accounting teams operate.
           </p>
         </div>
 
@@ -135,7 +135,7 @@ function Landing() {
               Ready to modernize your accounting?
             </h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: 1.7 }}>
-              Join forward-thinking finance teams who trust UVN SaaS to keep their books clean and compliant.
+              Join forward-thinking finance teams who trust UV Netware Accounting Utilities to keep their books clean and compliant.
             </p>
             <Link to="/signup" className="btn-primary" style={{ fontSize: '1rem', padding: '0.9rem 2.2rem' }}>Create free account →</Link>
           </div>
@@ -147,7 +147,7 @@ function Landing() {
         borderTop: '1px solid var(--border)', padding: '1.5rem 2rem',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem',
       }}>
-        <span style={{ color: 'var(--text-faint)', fontSize: '0.82rem' }}>© 2025 UVN SaaS. All rights reserved.</span>
+        <span style={{ color: 'var(--text-faint)', fontSize: '0.82rem' }}>© 2025 UV Netware Accounting Utilities. All rights reserved.</span>
         <div style={{ display: 'flex', gap: '1.5rem' }}>
           {['Privacy', 'Terms', 'Contact'].map((l) => (
             <a key={l} href="#" style={{ color: 'var(--text-faint)', fontSize: '0.82rem', textDecoration: 'none', transition: 'color 0.15s' }}
