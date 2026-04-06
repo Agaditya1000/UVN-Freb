@@ -41,7 +41,12 @@ const Register = () => {
   };
 
   const handleOAuth = async (provider) => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider,
+      options: {
+        redirectTo: window.location.origin + '/dashboard'
+      }
+    });
     if (error) setErrorMsg(error.message);
   };
 
