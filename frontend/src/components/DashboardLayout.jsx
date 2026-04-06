@@ -7,7 +7,7 @@ import { supabase } from '../services/supabase';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { businesses, activeBusiness, setActiveBusinessId } = useApp();
   const navigate = useNavigate();
 
@@ -21,8 +21,17 @@ const DashboardLayout = () => {
     { name: 'Chart of Accounts', path: '/dashboard/accounts', icon: <BookText size={20} /> },
     { name: 'Transactions', path: '/dashboard/transactions', icon: <FileSpreadsheet size={20} /> },
     { name: 'Reports', path: '/dashboard/reports', icon: <FileBarChart2 size={20} /> },
-    { name: 'Business Profile', path: '/dashboard/business', icon: <Building2 size={20} /> },
+    { 
+      name: 'Business Profile', 
+      path: '/dashboard/business', 
+      icon: <Building2 size={20} />,
+      roles: ['Owner'] 
+    },
   ];
+
+  const filteredNavItems = navItems.filter(item => 
+    !item.roles || item.roles.includes(role)
+  );
 
   return (
     <div className="flex h-screen bg-black text-white font-roboto overflow-hidden">
@@ -49,7 +58,7 @@ const DashboardLayout = () => {
           <div className="mb-6">
             <div className="text-xs text-grayText tracking-heading uppercase mb-3 px-2">Navigation</div>
             <nav className="space-y-1">
-              {navItems.map((item) => (
+              {filteredNavItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
