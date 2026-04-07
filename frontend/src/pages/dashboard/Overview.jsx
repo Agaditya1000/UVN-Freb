@@ -74,7 +74,7 @@ const Overview = () => {
           }`}
         >
           {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          <span>{isPositive ? '+12.5%' : '-4.2%'} from last month</span>
+          <span>{isPositive ? '0%' : '0%'} from last month</span>
         </div>
       )}
     </div>
