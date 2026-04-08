@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 
@@ -10,12 +10,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const resetSuccess = searchParams.get('reset') === 'success';
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-    
+    if (resetSuccess) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('reset');
+      setSearchParams(next, { replace: true });
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     
     if (error) {
@@ -44,6 +51,12 @@ const Login = () => {
             Access and manage your documents and databases securely.
           </div>
 
+          {resetSuccess && (
+            <div className="mb-6 p-4 border-[1.75px] border-success bg-black text-success text-sm text-center">
+              Your password was updated. Sign in with your new password.
+            </div>
+          )}
+
           {errorMsg && (
             <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
               {errorMsg}
@@ -66,7 +79,12 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="block text-sm font-medium text-white tracking-heading">Password</label>
-                <a href="#" className="text-sm text-grayText hover:text-white transition-none">Reset Password</a>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-grayText hover:text-white transition-none"
+                >
+                  Forgot password?
+                </Link>
               </div>
               <div className="relative">
                 <input 
