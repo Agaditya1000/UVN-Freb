@@ -4,6 +4,7 @@ import { useApp } from '../../contexts/AppContext';
 const Transactions = () => {
   const { activeBusiness, accounts, transactions, addTransaction } = useApp();
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   const [date, setDate] = useState('');
   const [desc, setDesc] = useState('');
@@ -15,18 +16,22 @@ const Transactions = () => {
     return <div className="text-center mt-20 text-grayText font-light">Please select an active business.</div>;
   }
 
-  const handlePost = (e) => {
+  const handlePost = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if(date && desc && debitAcc && creditAcc && amount > 0) {
-      addTransaction({
+      const { success } = await addTransaction({
         date,
         description: desc,
         debits: [{ accountId: debitAcc, amount: parseFloat(amount) }],
         credits: [{ accountId: creditAcc, amount: parseFloat(amount) }]
       });
-      setShowForm(false);
-      setDate(''); setDesc(''); setDebitAcc(''); setCreditAcc(''); setAmount('');
+      if(success) {
+        setShowForm(false);
+        setDate(''); setDesc(''); setDebitAcc(''); setCreditAcc(''); setAmount('');
+      }
     }
+    setLoading(false);
   };
 
   const getAccountName = (id) => accounts.find(a => a.id === id)?.name || id;

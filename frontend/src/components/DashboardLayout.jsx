@@ -36,7 +36,7 @@ const DashboardLayout = () => {
     { name: 'Overview', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Chart of Accounts', path: '/dashboard/accounts', icon: <BookText size={20} /> },
     { name: 'Transactions', path: '/dashboard/transactions', icon: <FileSpreadsheet size={20} /> },
-    { name: 'Reports', path: '/dashboard/reports', icon: <FileBarChart2 size={20} /> },
+    { name: 'Balance Sheet', path: '/dashboard/balance-sheet', icon: <FileBarChart2 size={20} /> },
     { name: 'Business Profile', path: '/dashboard/business', icon: <Building2 size={20} />, roles: ['Owner'] },
   ];
 

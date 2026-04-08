@@ -142,7 +142,7 @@ const Overview = () => {
           </button>
 
           <button
-            onClick={() => navigate("reports")}
+            onClick={() => navigate("balance-sheet")}
             className="btn-ghost text-sm shrink-0"
           >
             Generate Balance Sheet
