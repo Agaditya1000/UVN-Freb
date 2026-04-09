@@ -37,6 +37,34 @@ export const AppProvider = ({ children }) => {
 
   const addTransaction = (tData) => {
     setTransactions([{ id: Date.now().toString(), ...tData }, ...transactions]);
+
+    setAccounts(prevAccounts => {
+      const updatedAccounts = [...prevAccounts];
+
+      const updateBalance = (accountId, amount, isDebit) => {
+        const accIdx = updatedAccounts.findIndex(a => a.id === accountId);
+        if (accIdx > -1) {
+          const acc = updatedAccounts[accIdx];
+          // Assets & Expenses increase with Debits, decrease with Credits.
+          // Liabilities, Equity, Revenue increase with Credits, decrease with Debits.
+          const isAssetOrExpense = acc.category === 'Asset' || acc.category === 'Expense';
+          
+          let balanceChange = 0;
+          if (isDebit) {
+            balanceChange = isAssetOrExpense ? amount : -amount;
+          } else {
+            balanceChange = isAssetOrExpense ? -amount : amount;
+          }
+          
+          updatedAccounts[accIdx] = { ...acc, balance: acc.balance + balanceChange };
+        }
+      };
+
+      if (tData.debits) tData.debits.forEach(d => updateBalance(d.accountId, d.amount, true));
+      if (tData.credits) tData.credits.forEach(c => updateBalance(c.accountId, c.amount, false));
+
+      return updatedAccounts;
+    });
   };
 
   const value = {
