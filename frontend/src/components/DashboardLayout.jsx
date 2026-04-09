@@ -58,7 +58,7 @@ const DashboardLayout = () => {
         <div className="flex items-center justify-between h-16 px-6 border-b-[1.75px] border-borderDark bg-black">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-accent rounded flex items-center justify-center font-medium text-sm">UV</div>
-            <span className="font-medium tracking-heading text-lg">UVN <span className="text-success">SaaS</span></span>
+            <span className="font-medium tracking-heading text-sm text-success uppercase leading-tight">UV Netware <br/><span className="text-white">Accounting Utilities</span></span>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-grayText hover:text-white">
             <X size={20} />

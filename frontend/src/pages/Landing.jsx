@@ -94,7 +94,7 @@ const Landing = () => {
       <section className="py-24 px-6 md:px-12 bg-black border-t-[1.75px] border-borderDark border-b-[1.75px] shadow-none">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-medium text-white tracking-heading mb-4">Everything your finance team needs</h2>
-          <p className="text-grayText max-w-2xl mx-auto font-light">From compliance to real-time collaboration, UVN SaaS is built around the way modern accounting teams operate.</p>
+          <p className="text-grayText max-w-2xl mx-auto font-light">From compliance to real-time collaboration, UV Netware is built around the way modern accounting teams operate.</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
@@ -115,7 +115,7 @@ const Landing = () => {
             Ready to modernize your accounting?
           </h2>
           <p className="text-lightWhite mb-10 max-w-lg font-light">
-            Join forward-thinking finance teams who trust UVN SaaS to keep their books clean and compliant.
+            Join forward-thinking finance teams who trust UV Netware Accounting Utilities to keep their books clean and compliant.
           </p>
           <Link 
             to="/signup" 
@@ -128,7 +128,7 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="mt-auto border-t-[1.75px] border-borderDark bg-naviBlue py-6 px-12 flex justify-between items-center text-sm shadow-none text-grayText font-light">
-        <span>© 2026 UVN SaaS. All rights reserved.</span>
+        <span>© 2026 UV Netware Accounting Utilities. All rights reserved.</span>
         <div className="flex gap-6">
           <Link to="#" className="font-light hover:text-white transition-none">Privacy</Link>
           <Link to="#" className="font-light hover:text-white transition-none">Terms</Link>
