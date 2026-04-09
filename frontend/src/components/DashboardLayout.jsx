@@ -36,19 +36,19 @@ const DashboardLayout = () => {
     { name: 'Overview', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Chart of Accounts', path: '/dashboard/accounts', icon: <BookText size={20} /> },
     { name: 'Transactions', path: '/dashboard/transactions', icon: <FileSpreadsheet size={20} /> },
-    { name: 'Reports', path: '/dashboard/reports', icon: <FileBarChart2 size={20} /> },
+    { name: 'Balance Sheet', path: '/dashboard/balance-sheet', icon: <FileBarChart2 size={20} /> },
     { name: 'Business Profile', path: '/dashboard/business', icon: <Building2 size={20} />, roles: ['Owner'] },
   ];
 
-  const filteredNavItems = navItems.filter(item => 
+  const filteredNavItems = navItems.filter(item =>
     !item.roles || item.roles.includes(role)
   );
 
   return (
     <div className="flex h-screen bg-black text-white font-roboto overflow-hidden">
-      
+
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-20 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -57,7 +57,7 @@ const DashboardLayout = () => {
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-naviBlue border-r-[1.75px] border-borderDark transform transition-transform duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between h-16 px-6 border-b-[1.75px] border-borderDark bg-black">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-accent rounded flex items-center justify-center text-sm">UV</div>
+            <div className="w-8 h-8 bg-accent rounded flex items-center justify-center font-medium text-sm">UV</div>
             <span className="font-medium tracking-heading text-lg">UVN <span className="text-success">SaaS</span></span>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-grayText hover:text-white">
@@ -74,8 +74,7 @@ const DashboardLayout = () => {
                 end={item.path === '/dashboard'}
                 onClick={() => setIsSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded hover:bg-borderDark text-sm ${
-                    isActive ? 'bg-borderDark/40 text-success border-l-2 border-success' : 'text-lightWhite'
+                  `flex items-center gap-3 px-3 py-2.5 rounded hover:bg-borderDark text-sm ${isActive ? 'bg-borderDark/40 text-success border-l-2 border-success' : 'text-lightWhite'
                   }`
                 }
               >
@@ -96,7 +95,7 @@ const DashboardLayout = () => {
 
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-sm text-grayText">Active Entity:</span>
-              <select 
+              <select
                 value={activeBusiness?.id || ''}
                 onChange={(e) => setActiveBusinessId(e.target.value)}
                 className="bg-black border-[1.75px] border-borderDark px-3 py-1.5 text-sm text-white"

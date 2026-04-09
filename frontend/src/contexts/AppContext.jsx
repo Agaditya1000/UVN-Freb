@@ -14,14 +14,13 @@ export const AppProvider = ({ children }) => {
   
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Fetch businesses user has access to
   useEffect(() => {
     if (!user) return;
     
     const loadBusinesses = async () => {
-      // Because of our RLS policies, this safely returns only 
-      // businesses the user is linked to via business_users.
       const { data, error } = await supabase
         .from('businesses')
         .select('*')
@@ -38,6 +37,37 @@ export const AppProvider = ({ children }) => {
     loadBusinesses();
   }, [user]);
 
+  // Fetch accounts and transactions when activeBusinessId changes
+  useEffect(() => {
+    if (!activeBusinessId) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      
+      // Load Accounts
+      const { data: accData, error: accError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('business_id', activeBusinessId)
+        .order('id', { ascending: true });
+      
+      if (!accError && accData) setAccounts(accData);
+
+      // Load Transactions
+      const { data: transData, error: transError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('business_id', activeBusinessId)
+        .order('date', { ascending: false });
+
+      if (!transError && transData) setTransactions(transData);
+      
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [activeBusinessId]);
+
   const activeBusiness = businesses.find(b => b.id === activeBusinessId) || null;
 
   // Insert business and map it to the user
@@ -46,54 +76,104 @@ export const AppProvider = ({ children }) => {
     
     const newId = crypto.randomUUID();
 
-    // 1. Insert into businesses table
     const { error: bError } = await supabase
       .from('businesses')
       .insert([{ id: newId, ...businessData }]);
       
-    if (bError) {
-      console.error("Error creating business:", bError);
-      return { success: false, error: bError };
-    }
+    if (bError) return { success: false, error: bError };
     
-    // 2. Map Owner in business_users
     const { error: mapError } = await supabase
       .from('business_users')
       .insert([{
         business_id: newId,
         user_id: user.id,
-        role: 'Owner' // Creator is always the Owner globally/locally
+        role: 'Owner'
       }]);
       
-    if (mapError) {
-      console.error("Error mapping business to user:", mapError);
-      return { success: false, error: mapError };
-    }
+    if (mapError) return { success: false, error: mapError };
     
-    // 3. Update UI state
     const newBusiness = { id: newId, ...businessData };
     setBusinesses(prev => [newBusiness, ...prev]);
     setActiveBusinessId(newId);
     return { success: true };
   };
 
-  const addAccount = (accountData) => {
-    setAccounts([...accounts, { id: Date.now().toString(), balance: 0, ...accountData }]);
+  const addAccount = async (accountData) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { data, error } = await supabase
+      .from('accounts')
+      .insert([{ 
+        business_id: activeBusinessId,
+        ...accountData,
+        balance: accountData.balance || 0
+      }])
+      .select();
+
+    if (error) return { success: false, error };
+
+    setAccounts(prev => [...prev, data[0]]);
+    return { success: true };
   };
 
-  const addTransaction = (tData) => {
-    setTransactions([{ id: Date.now().toString(), ...tData }, ...transactions]);
+  const addTransaction = async (tData) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([{ 
+        business_id: activeBusinessId,
+        ...tData 
+      }])
+      .select();
+
+    if (error) return { success: false, error };
+
+    setTransactions(prev => [data[0], ...prev]);
+    return { success: true };
   };
+
+  // Calculate balances dynamically from transactions
+  const accountsWithBalances = accounts.map(account => {
+    let balance = 0;
+    
+    transactions.forEach(tx => {
+      // Check debits
+      tx.debits?.forEach(d => {
+        if (d.accountId === account.id) {
+          if (['Asset', 'Expense'].includes(account.category)) {
+            balance += d.amount;
+          } else {
+            balance -= d.amount;
+          }
+        }
+      });
+      
+      // Check credits
+      tx.credits?.forEach(c => {
+        if (c.accountId === account.id) {
+          if (['Asset', 'Expense'].includes(account.category)) {
+            balance -= c.amount;
+          } else {
+            balance += c.amount;
+          }
+        }
+      });
+    });
+
+    return { ...account, balance };
+  });
 
   const value = {
     businesses,
     activeBusiness,
     setActiveBusinessId,
     addBusiness,
-    accounts,
+    accounts: accountsWithBalances,
     addAccount,
     transactions,
-    addTransaction
+    addTransaction,
+    loading
   };
 
   return (

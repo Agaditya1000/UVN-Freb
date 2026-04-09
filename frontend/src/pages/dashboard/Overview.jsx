@@ -74,7 +74,7 @@ const Overview = () => {
           }`}
         >
           {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          <span>{isPositive ? '+12.5%' : '-4.2%'} from last month</span>
+          <span>{isPositive ? '0%' : '0%'} from last month</span>
         </div>
       )}
     </div>
@@ -142,7 +142,7 @@ const Overview = () => {
           </button>
 
           <button
-            onClick={() => navigate("reports")}
+            onClick={() => navigate("balance-sheet")}
             className="btn-ghost text-sm shrink-0"
           >
             Generate Balance Sheet

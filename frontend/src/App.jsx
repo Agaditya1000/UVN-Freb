@@ -13,7 +13,7 @@ import Overview from './pages/dashboard/Overview';
 import BusinessSetup from './pages/dashboard/BusinessSetup';
 import ChartOfAccounts from './pages/dashboard/ChartOfAccounts';
 import Transactions from './pages/dashboard/Transactions';
-import Reports from './pages/dashboard/Reports';
+import BalanceSheet from './pages/dashboard/BalanceSheet';
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
               <Route path="business" element={<ProtectedRoute allowedRoles={['Owner']}><BusinessSetup /></ProtectedRoute>} />
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="transactions" element={<Transactions />} />
-              <Route path="reports" element={<Reports />} />
+              <Route path="balance-sheet" element={<BalanceSheet />} />
             </Route>
             
             <Route 
