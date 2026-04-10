@@ -34,20 +34,25 @@ const Login = () => {
   };
 
   const handleOAuth = async (provider) => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider,
+      options: {
+        redirectTo: window.location.origin + '/dashboard'
+      }
+    });
     if (error) setErrorMsg(error.message);
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex min-h-screen bg-black text-lightWhite font-roboto font-light">
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 shadow-none transition-none">
+        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12">
           
           <div className="mb-8 flex justify-center text-center">
             <h1 className="text-3xl md:text-4xl font-medium text-white tracking-heading">UV Netware Accounting Utilities</h1>
           </div>
 
-          <div className="mb-8 p-4 border-[1.75px] border-borderDark bg-black text-center text-sm md:text-base">
+          <div className="mb-8 p-4 border-[1.75px] border-borderDark bg-black text-center text-sm md:text-base font-light">
             Access and manage your documents and databases securely.
           </div>
 
@@ -58,7 +63,7 @@ const Login = () => {
           )}
 
           {errorMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
+            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center font-light">
               {errorMsg}
             </div>
           )}
@@ -72,7 +77,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email" 
                 required
-                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
+                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent font-light"
               />
             </div>
 
@@ -93,12 +98,12 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password" 
                   required
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
+                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent font-light"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white transition-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -108,30 +113,30 @@ const Login = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
+              className="btn-primary w-full mt-4 disabled:opacity-50"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
           </form>
 
           <div className="my-8 flex items-center justify-between">
             <span className="border-b-[1.75px] border-borderDark w-1/5 lg:w-1/4"></span>
-            <span className="text-xs text-center text-grayText uppercase tracking-heading">OR CONTINUE WITH</span>
+            <span className="text-xs text-center text-grayText uppercase tracking-heading font-medium">OR CONTINUE WITH</span>
             <span className="border-b-[1.75px] border-borderDark w-1/5 lg:w-1/4"></span>
           </div>
 
           <div className="flex flex-col space-y-4 mb-8">
-            <button onClick={() => handleOAuth('google')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
-               Google
+            <button onClick={() => handleOAuth('google')} type="button" className="btn-ghost w-full">
+               GOOGLE
             </button>
-            <button onClick={() => handleOAuth('github')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
-               GitHub
+            <button onClick={() => handleOAuth('github')} type="button" className="btn-ghost w-full">
+               GITHUB
             </button>
           </div>
 
-          <div className="text-center text-sm md:text-base">
+          <div className="text-center text-sm md:text-base font-light">
             <span className="text-grayText">Don't have an account? </span>
-            <Link to="/signup" className="text-white hover:underline transition-none font-medium">Sign Up</Link>
+            <Link to="/signup" className="text-white font-medium">Sign Up</Link>
           </div>
         </div>
       </div>
@@ -141,18 +146,16 @@ const Login = () => {
             <div className="w-24 h-24 border-[1.75px] border-accent rounded-full mb-8 flex items-center justify-center bg-black">
               <span className="text-accent tracking-heading font-medium text-2xl">UVN</span>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-medium text-white tracking-heading mb-6 leading-tight">
+            <h2 className="text-4xl lg:text-5xl font-medium text-white tracking-heading mb-6 leading-normal">
               Enterprise Grade Financial Management
             </h2>
-            <p className="text-lightWhite text-lg font-light leading-relaxed mb-4">
+            <p className="text-lightWhite text-lg font-light leading-normal mb-4">
               Experience multi-region standard compliance including GAAP, IFRS, and IND-AS/GST in one comprehensive platform.
             </p>
          </div>
-         <div className="absolute top-0 right-0 w-full h-1 bg-accent"></div>
       </div>
     </div>
   );
 };
 
 export default Login;
-

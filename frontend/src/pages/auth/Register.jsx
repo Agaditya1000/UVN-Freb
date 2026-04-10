@@ -41,26 +41,31 @@ const Register = () => {
   };
 
   const handleOAuth = async (provider) => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider,
+      options: {
+        redirectTo: window.location.origin + '/dashboard'
+      }
+    });
     if (error) setErrorMsg(error.message);
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex min-h-screen bg-black text-lightWhite font-roboto font-light">
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 shadow-none transition-none">
+        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12">
           
           <div className="mb-8 flex justify-center text-center">
             <h1 className="text-3xl md:text-4xl font-medium text-white tracking-heading">UV Netware Accounting Utilities</h1>
           </div>
 
           {errorMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
+            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center font-light">
               {errorMsg}
             </div>
           )}
           {successMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-success bg-black text-success text-sm text-center">
+            <div className="mb-6 p-4 border-[1.75px] border-success bg-black text-success text-sm text-center font-light">
               {successMsg}
             </div>
           )}
@@ -74,7 +79,7 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. John Doe" 
                 required
-                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
+                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent font-light"
               />
             </div>
 
@@ -84,7 +89,7 @@ const Register = () => {
                 <select 
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite focus:outline-none focus:border-accent transition-none appearance-none"
+                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite focus:outline-none focus:border-accent font-light appearance-none"
                 >
                   <option value="Owner">Owner</option>
                   <option value="Accountant">Accountant</option>
@@ -104,7 +109,7 @@ const Register = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email" 
                 required
-                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
+                className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent font-light"
               />
             </div>
 
@@ -117,12 +122,12 @@ const Register = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a strong password" 
                   required
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
+                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent font-light"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white transition-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -132,30 +137,30 @@ const Register = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
+              className="btn-primary w-full mt-4 disabled:opacity-50"
             >
-              {loading ? 'Registering...' : 'Sign Up'}
+              {loading ? 'REGISTERING...' : 'SIGN UP'}
             </button>
           </form>
 
           <div className="my-8 flex items-center justify-between">
             <span className="border-b-[1.75px] border-borderDark w-1/5 lg:w-1/4"></span>
-            <span className="text-xs text-center text-grayText uppercase tracking-heading">OR CONTINUE WITH</span>
+            <span className="text-xs text-center text-grayText uppercase tracking-heading font-medium">OR CONTINUE WITH</span>
             <span className="border-b-[1.75px] border-borderDark w-1/5 lg:w-1/4"></span>
           </div>
 
           <div className="flex flex-col space-y-4 mb-8">
-            <button onClick={() => handleOAuth('google')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
-               Google
+            <button onClick={() => handleOAuth('google')} type="button" className="btn-ghost w-full">
+               GOOGLE
             </button>
-            <button onClick={() => handleOAuth('github')} type="button" className="w-full p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase flex justify-center items-center">
-               GitHub
+            <button onClick={() => handleOAuth('github')} type="button" className="btn-ghost w-full">
+               GITHUB
             </button>
           </div>
 
-          <div className="text-center text-sm md:text-base">
+          <div className="text-center text-sm md:text-base font-light">
             <span className="text-grayText">Already have an account? </span>
-            <Link to="/login" className="text-white hover:underline transition-none font-medium">Sign In</Link>
+            <Link to="/login" className="text-white font-medium">Sign In</Link>
           </div>
 
         </div>
@@ -166,14 +171,13 @@ const Register = () => {
             <div className="w-24 h-24 border-[1.75px] border-accent rounded-full mb-8 flex items-center justify-center bg-naviBlue">
               <span className="text-accent tracking-heading font-medium text-2xl">UVN</span>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-medium text-white tracking-heading mb-6 leading-tight">
+            <h2 className="text-4xl lg:text-5xl font-medium text-white tracking-heading mb-6 leading-normal">
               Create Your New Organization
             </h2>
-            <p className="text-lightWhite text-lg font-light leading-relaxed mb-4">
+            <p className="text-lightWhite text-lg font-light leading-normal mb-4">
               Step into the future of accounting. Define your business settings and invite stakeholders safely right after signing up.
             </p>
          </div>
-         <div className="absolute top-0 right-0 w-full h-1 bg-accent"></div>
       </div>
     </div>
   );

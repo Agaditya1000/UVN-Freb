@@ -8,13 +8,22 @@ import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppProvider } from './contexts/AppContext';
+
+import DashboardLayout from './components/DashboardLayout';
+import Overview from './pages/dashboard/Overview';
+import BusinessSetup from './pages/dashboard/BusinessSetup';
+import ChartOfAccounts from './pages/dashboard/ChartOfAccounts';
+import Transactions from './pages/dashboard/Transactions';
+import BalanceSheet from './pages/dashboard/BalanceSheet';
 
 function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+    <AppProvider>
       <Router>
-        <div className="min-h-screen bg-black text-lightWhite font-roboto font-light antialiased">
+        <div className="min-h-screen bg-black text-lightWhite antialiased">
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -22,31 +31,17 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* Protected Routes */}
             <Route 
               path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <div className="flex flex-col h-screen items-center justify-center bg-black text-white px-4">
-                    <h2 className="text-3xl font-medium tracking-heading mb-4">Dashboard Protected View</h2>
-                    <p className="text-lightWhite">Available to Owner, Accountant, and Viewer.</p>
-                  </div>
-                </ProtectedRoute>
-              } 
-            />
+              element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} 
+            >
+              <Route index element={<Overview />} />
+              <Route path="business" element={<ProtectedRoute allowedRoles={['Owner']}><BusinessSetup /></ProtectedRoute>} />
+              <Route path="accounts" element={<ChartOfAccounts />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="balance-sheet" element={<BalanceSheet />} />
+            </Route>
             
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute allowedRoles={['Owner']}>
-                  <div className="flex flex-col h-screen items-center justify-center bg-black text-white px-4">
-                    <h2 className="text-3xl font-medium tracking-heading text-success mb-4 pb-2 border-b-[1.75px] border-success">Owner Settings</h2>
-                    <p className="text-lightWhite">Only users with the 'Owner' role can access this page.</p>
-                  </div>
-                </ProtectedRoute>
-              } 
-            />
-
             <Route 
               path="/unauthorized" 
               element={
@@ -59,6 +54,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+    </AppProvider>
     </AuthProvider>
     </ThemeProvider>
   );
