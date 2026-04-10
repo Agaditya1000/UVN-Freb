@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -59,45 +59,71 @@ const DashboardLayout = () => {
             <Menu size={24} />
           </button>
 
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-primary text-white flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 font-bold italic tracking-tighter">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary text-white flex items-center justify-center rounded-xl shadow-lg shadow-primary/30 font-bold italic tracking-tighter shrink-0 cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate('/dashboard')}>
               UV
             </div>
-            <div className="hidden lg:block">
-              <p className="text-sm font-bold tracking-tight text-text">UV Netware Utility</p>
-              <p className="text-[10px] uppercase tracking-widest text-text-secondary font-semibold">B-Suite Enterprise</p>
+            <div className="flex flex-col">
+              <span className="font-bold text-xs sm:text-sm md:text-lg tracking-tight text-text leading-tight">UV Netware</span>
+              <span className="text-primary font-black text-[8px] sm:text-[10px] md:text-xs tracking-[0.2em] uppercase -mt-0.5 sm:-mt-1">Utilities</span>
             </div>
           </div>
 
           <div className="h-8 w-[1px] bg-border mx-2 hidden md:block"></div>
 
-          {/* ENTITY SELECTOR */}
-          <div className="hidden md:flex items-center gap-3 relative" ref={entityRef}>
-            <span className="text-sm font-medium text-text-secondary">Entity:</span>
-            <button
-              onClick={() => setShowEntity(!showEntity)}
-              className="flex items-center gap-3 px-4 py-2 rounded-xl bg-bg border border-border text-sm font-semibold hover:border-primary hover:text-primary transition-all group"
-            >
-              {activeBusiness?.name || "Select Entity"}
-              <ChevronDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
-            </button>
+          {/* BUSINESS UNIT SELECTOR */}
+          <div className="hidden md:flex items-center gap-6 relative pl-6 border-l border-border" ref={entityRef}>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-1">Business Unit</span>
+              <button
+                onClick={() => setShowEntity(!showEntity)}
+                className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-surface border border-border text-sm font-bold text-text hover:border-primary hover:shadow-lg hover:shadow-primary/10 transition-all group relative overflow-hidden active:scale-95"
+              >
+                <div className="p-1.5 bg-bg rounded-lg text-primary border border-border group-hover:bg-primary/10 transition-colors">
+                  <Building2 size={16} />
+                </div>
+                <span className="max-w-[140px] truncate">{activeBusiness?.name || "Select Portfolio"}</span>
+                <ChevronDown size={14} className={`text-text-secondary transition-transform duration-300 ${showEntity ? 'rotate-180' : ''}`} />
+                
+                {/* Subtle highlight line */}
+                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+              </button>
+            </div>
 
             {showEntity && (
-              <div className="absolute top-12 left-0 w-64 bg-surface border border-border rounded-xl shadow-2xl z-[100] p-1.5 animate-in slide-in-from-top-2 duration-200">
-                <p className="px-3 py-2 text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em]">Switch Business</p>
-                {businesses.map(b => (
-                  <button
-                    key={b.id}
-                    onClick={() => handleEntityChange(b.id)}
-                    className={`w-full text-left px-3 py-2.5 text-sm rounded-lg transition-all flex items-center justify-between
-                      ${activeBusiness?.id === b.id
-                        ? 'bg-primary/10 text-primary font-bold'
-                        : 'hover:bg-bg text-text'}`}
-                  >
-                    {b.name}
-                    {activeBusiness?.id === b.id && <div className="w-1.5 h-1.5 rounded-full bg-primary ring-4 ring-primary/20"></div>}
-                  </button>
-                ))}
+              <div className="absolute top-full left-6 mt-3 w-72 bg-surface border border-border rounded-[2rem] p-3 z-50 shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="px-4 py-2 mb-2">
+                  <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Available Business Units</p>
+                </div>
+                <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
+                  {businesses.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => handleEntityChange(b.id)}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${
+                        activeBusiness?.id === b.id 
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                        : 'text-text hover:bg-bg hover:translate-x-1'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${activeBusiness?.id === b.id ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>
+                          {b.name[0].toUpperCase()}
+                        </div>
+                        <span className="truncate">{b.name}</span>
+                      </div>
+                      {activeBusiness?.id === b.id && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-border flex justify-center">
+                   <button 
+                     onClick={() => { setShowEntity(false); navigate('/dashboard/business'); }}
+                     className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                   >
+                     Manage Business Units
+                   </button>
+                </div>
               </div>
             )}
           </div>
@@ -149,7 +175,10 @@ const DashboardLayout = () => {
                 <p className="text-xs font-bold text-text truncate">{user?.email}</p>
                 <p className="text-[10px] text-text-secondary font-medium">Session ID: {user?.id?.slice(0,8)}</p>
               </div>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors">
+              <button 
+                onClick={() => { setShowMenu(false); navigate('/dashboard/profile'); }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors"
+              >
                 <User size={16} /> Profile
               </button>
               <button 
@@ -242,7 +271,7 @@ const DashboardLayout = () => {
         </div>
       )}
 
-      <main className="p-6 md:p-12 xl:p-16 max-w-screen-2xl mx-auto anim-fade-up">
+      <main className="p-6 md:p-12 xl:p-16 max-w-screen-2xl mx-auto">
         <Outlet />
       </main>
 

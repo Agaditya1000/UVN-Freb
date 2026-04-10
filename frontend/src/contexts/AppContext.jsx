@@ -164,6 +164,39 @@ export const AppProvider = ({ children }) => {
     return { ...account, balance };
   });
 
+  const updateAccount = async (accountId, businessId, updatedData) => {
+    // Remove keys that involve the identity of the record
+    const { id, business_id, ...dataToUpdate } = updatedData;
+    
+    const { data, error } = await supabase
+      .from('accounts')
+      .update(dataToUpdate)
+      .eq('id', accountId)
+      .eq('business_id', businessId)
+      .select();
+
+    if (error) return { success: false, error };
+    
+    if (data && data.length > 0) {
+      setAccounts(prev => prev.map(acc => (acc.id === accountId && acc.business_id === businessId) ? data[0] : acc));
+      return { success: true };
+    }
+    return { success: false, error: 'Authorization error or record not found' };
+  };
+
+  const deleteAccount = async (accountId, businessId) => {
+    const { error } = await supabase
+      .from('accounts')
+      .delete()
+      .eq('id', accountId)
+      .eq('business_id', businessId);
+
+    if (error) return { success: false, error };
+
+    setAccounts(prev => prev.filter(acc => !(acc.id === accountId && acc.business_id === businessId)));
+    return { success: true };
+  };
+
   const value = {
     businesses,
     activeBusiness,
@@ -171,6 +204,8 @@ export const AppProvider = ({ children }) => {
     addBusiness,
     accounts: accountsWithBalances,
     addAccount,
+    updateAccount,
+    deleteAccount,
     transactions,
     addTransaction,
     loading

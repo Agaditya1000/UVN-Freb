@@ -16,6 +16,7 @@ import BusinessSetup from './pages/dashboard/BusinessSetup';
 import ChartOfAccounts from './pages/dashboard/ChartOfAccounts';
 import Transactions from './pages/dashboard/Transactions';
 import BalanceSheet from './pages/dashboard/BalanceSheet';
+import Profile from './pages/dashboard/Profile';
 
 function App() {
   return (
@@ -28,10 +29,9 @@ function App() {
             <Route path="/" element={<Landing />}>
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Register />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
+              <Route path="reset-password" element={<ResetPassword />} />
             </Route>
-
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
             
             <Route 
               path="/dashboard" 
@@ -42,6 +42,7 @@ function App() {
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="balance-sheet" element={<BalanceSheet />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             
             <Route 
