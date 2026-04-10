@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../services/supabase';
-import ThemeToggle from '../../components/ThemeToggle';
 import AuthModal from '../../components/AuthModal';
 
 const Login = () => {
@@ -12,12 +11,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const resetSuccess = searchParams.get('reset') === 'success';
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-    
+    if (resetSuccess) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('reset');
+      setSearchParams(next, { replace: true });
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     
     if (error) {
@@ -50,6 +56,12 @@ const Login = () => {
           <p className="text-sm text-text-secondary font-normal">Enter your credentials to access your utilities.</p>
         </div>
 
+        {resetSuccess && (
+          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm rounded-xl text-center font-medium animate-in slide-in-from-top-2">
+            Your password was updated. Sign in with your new password.
+          </div>
+        )}
+
         {errorMsg && (
           <div className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl text-center font-medium animate-in slide-in-from-top-2">
             {errorMsg}
@@ -72,7 +84,9 @@ const Login = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="input-label font-semibold">Password</label>
-              <a href="#" className="text-xs text-primary hover:underline font-medium">Forgot Password?</a>
+              <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                Forgot Password?
+              </Link>
             </div>
             <div className="relative">
               <input 
