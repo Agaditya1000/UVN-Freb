@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, XCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../../services/supabase';
+import AuthModal from '../../components/AuthModal';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -94,124 +95,127 @@ const ResetPassword = () => {
     navigate('/login?reset=success', { replace: true });
   };
 
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen bg-black items-center justify-center px-4">
-        <p className="text-lightWhite text-sm tracking-heading">Verifying reset link…</p>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    if (checkingSession) {
+      return (
+        <div className="p-12 text-center flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-6" />
+          <h2 className="text-xl font-bold text-text mb-2">Verifying reset link...</h2>
+          <p className="text-sm text-text-secondary">Please wait while we secure your session.</p>
+        </div>
+      );
+    }
 
-  if (!canReset) {
-    return (
-      <div className="flex min-h-screen bg-black">
-        <div className="w-full flex items-center justify-center p-6 md:p-12">
-          <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 text-center">
-            <h1 className="text-2xl font-medium text-white tracking-heading mb-4">Link invalid or expired</h1>
-            <p className="text-lightWhite text-sm mb-8">
-              Request a new reset link from the sign-in page. Links expire after a short time for security.
-            </p>
-            <Link
-              to="/forgot-password"
-              className="inline-block p-4 font-medium tracking-heading text-white border-white border-[2px] rounded-[145px] hover:bg-white hover:text-black transition-none uppercase"
-            >
-              Request new link
+    if (!canReset) {
+      return (
+        <div className="p-12 text-center flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-8">
+            <XCircle size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-text mb-3">Link invalid or expired</h1>
+          <p className="text-sm text-text-secondary mb-10 max-w-sm">
+            Request a new reset link from the sign-in page. Links expire after a short time for security.
+          </p>
+          <Link
+            to="/forgot-password"
+            className="btn-primary w-full py-4 text-sm font-bold shadow-lg"
+          >
+            Request New Link
+          </Link>
+          <div className="mt-8">
+            <Link to="/login" className="text-primary font-semibold text-sm hover:underline">
+              Back to Sign In
             </Link>
-            <div className="mt-6">
-              <Link to="/login" className="text-grayText hover:text-white text-sm">
-                Back to sign in
-              </Link>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-8 md:p-12 bg-surface">
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-xl mb-6">
+            <span className="text-xl font-bold tracking-tighter italic">UV</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-text mb-2">Choose new password</h1>
+          <p className="text-sm text-text-secondary font-normal">Enter a strong password you have not used elsewhere.</p>
+        </div>
+
+        {errorMsg && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl text-center font-medium">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="input-label">New Password</label>
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••" 
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="input-field"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <label className="input-label">Confirm Password</label>
+            <div className="relative">
+              <input 
+                type={showConfirm ? "text" : "password"} 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••••••" 
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="input-field"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text transition-colors"
+              >
+                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="btn-primary w-full py-4.5 text-base shadow-sm mt-4"
+          >
+            {loading ? 'Updating...' : 'Update Password'}
+          </button>
+        </form>
+
+        <div className="mt-10 text-center">
+          <Link to="/login" className="text-primary font-semibold text-sm hover:underline">
+            Cancel and return to sign in
+          </Link>
         </div>
       </div>
     );
-  }
+  };
 
   return (
-    <div className="flex min-h-screen bg-black">
-      <div className="w-full flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 shadow-none transition-none">
-          <div className="mb-8 flex justify-center text-center">
-            <h1 className="text-3xl md:text-4xl font-medium text-white tracking-heading">Choose a new password</h1>
-          </div>
-
-          <p className="mb-8 p-4 border-[1.75px] border-borderDark bg-black text-center text-sm text-lightWhite">
-            Enter a strong password you have not used elsewhere.
-          </p>
-
-          {errorMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
-              {errorMsg}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white tracking-heading">New password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white transition-none"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white tracking-heading">Confirm password</label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat new password"
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 pr-12 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-grayText hover:text-white transition-none"
-                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
-            >
-              {loading ? 'Updating…' : 'Update password'}
-            </button>
-          </form>
-
-          <div className="mt-10 text-center">
-            <Link to="/login" className="text-grayText hover:text-white text-sm">
-              Cancel and return to sign in
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthModal>
+      {renderContent()}
+    </AuthModal>
   );
 };
 

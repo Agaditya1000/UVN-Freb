@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, getAuthRedirectOrigin } from '../../services/supabase';
+import AuthModal from '../../components/AuthModal';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -28,75 +29,72 @@ const ForgotPassword = () => {
     }
 
     setInfoMsg(
-      'If an account exists for that email, you will receive a link to reset your password shortly. Check your inbox and spam folder.'
+      'If an account exists for that email, you will receive a link to reset your password shortly. Check your inbox.'
     );
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
-      <div className="w-full flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-lg bg-naviBlue border-[1.75px] border-borderDark p-8 md:p-12 shadow-none transition-none">
-          <div className="mb-8 flex justify-center text-center">
-            <h1 className="text-3xl md:text-4xl font-medium text-white tracking-heading">Reset your password</h1>
+    <AuthModal>
+      <div className="p-8 md:p-12 bg-surface">
+        
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-xl mb-6">
+            <span className="text-xl font-bold tracking-tighter italic">UV</span>
           </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-text mb-2">Reset Password</h1>
+          <p className="text-sm text-text-secondary font-normal">Enter your email and we'll send you a reset link.</p>
+        </div>
 
-          <p className="mb-8 p-4 border-[1.75px] border-borderDark bg-black text-center text-sm md:text-base text-lightWhite">
-            Enter the email you use to sign in. We will send you a link to choose a new password.
-          </p>
+        {errorMsg && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl text-center font-medium animate-in slide-in-from-top-2">
+            {errorMsg}
+          </div>
+        )}
 
-          {errorMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-error bg-black text-error text-sm text-center">
-              {errorMsg}
+        {infoMsg && (
+          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm rounded-xl text-center font-medium animate-in slide-in-from-top-2">
+            {infoMsg}
+          </div>
+        )}
+
+        {!infoMsg && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="input-label">Email Address</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. name@company.com" 
+                required
+                autoComplete="email"
+                className="input-field"
+              />
             </div>
-          )}
 
-          {infoMsg && (
-            <div className="mb-6 p-4 border-[1.75px] border-success bg-black text-success text-sm text-center">
-              {infoMsg}
-            </div>
-          )}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-primary w-full py-4.5 text-base shadow-sm mt-4"
+            >
+              {loading ? 'Sending Link...' : 'Send Reset Link'}
+            </button>
+          </form>
+        )}
 
-          {!infoMsg && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-white tracking-heading">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  autoComplete="email"
-                  className="w-full bg-black border-[1.75px] border-borderDark p-3 md:p-4 text-lightWhite placeholder-grayText focus:outline-none focus:border-accent transition-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full mt-4 p-4 font-medium tracking-heading text-white border-white border-[2px] bg-transparent rounded-[145px] hover:bg-white hover:text-black transition-none uppercase disabled:opacity-50"
-              >
-                {loading ? 'Sending…' : 'Send reset link'}
-              </button>
-            </form>
-          )}
-
-          <div className="mt-10 text-center text-sm md:text-base space-y-2">
-            <div>
-              <Link to="/login" className="text-white hover:underline transition-none font-medium">
-                Back to sign in
-              </Link>
-            </div>
-            <div>
-              <span className="text-grayText">No account? </span>
-              <Link to="/signup" className="text-white hover:underline transition-none font-medium">
-                Sign up
-              </Link>
-            </div>
+        <div className="mt-10 text-center text-sm font-normal space-y-3">
+          <div>
+            <Link to="/login" className="text-primary font-semibold hover:underline">
+              Back to Sign In
+            </Link>
+          </div>
+          <div>
+            <span className="text-text-secondary">New here? </span>
+            <Link to="/signup" className="text-primary font-semibold hover:underline">Create Account</Link>
           </div>
         </div>
       </div>
-    </div>
+    </AuthModal>
   );
 };
 
