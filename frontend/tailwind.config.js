@@ -7,15 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: {
+          DEFAULT: "var(--primary)",
+          hover: "var(--primary-hover)",
+        },
+        bg: "var(--bg)",
+        text: {
+          DEFAULT: "var(--text)",
+          secondary: "var(--text-secondary)",
+        },
+        border: "var(--border)",
+        surface: "var(--surface)",
         accent: "#0000EE",
-        white: "#FFFFFF",
-        lightWhite: "#EEEEEE",
-        black: "#000000",
-        borderDark: "#000055",
-        naviBlue: "#000021",
         error: "#D50000",
         success: "#00BFA5",
-        grayText: "#757575"
       },
       fontFamily: {
         roboto: ['Roboto', 'sans-serif'],
