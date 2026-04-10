@@ -23,11 +23,13 @@ function App() {
     <AuthProvider>
     <AppProvider>
       <Router>
-        <div className="min-h-screen bg-black text-lightWhite antialiased">
+        <div className="min-h-screen bg-bg text-text antialiased transition-colors duration-300">
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Register />} />
+            <Route path="/" element={<Landing />}>
+              <Route path="login" element={<Login />} />
+              <Route path="signup" element={<Register />} />
+            </Route>
+
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
