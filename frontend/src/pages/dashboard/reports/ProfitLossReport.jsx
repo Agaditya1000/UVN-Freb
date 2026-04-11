@@ -27,7 +27,11 @@ const ProfitLossReport = () => {
     activeBusiness?.currency === 'USD' ? '$' : activeBusiness?.currency === 'EUR' ? '€' : '₹';
 
   if (!activeBusiness) {
-    return <p className="text-text-secondary text-sm font-medium">Select a business to run reports.</p>;
+    return (
+      <p className="text-text-secondary text-sm font-medium">
+        Select a business unit to generate financial reports.
+      </p>
+    );
   }
 
   const LineBlock = ({ title, lines, tone }) => (
@@ -58,8 +62,9 @@ const ProfitLossReport = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-text">Profit & loss</h2>
-        <p className="text-sm text-text-secondary mt-1 font-medium">
-          Revenue and expense for the selected period (activity basis).
+        <p className="text-sm text-text-secondary mt-1 font-medium leading-relaxed">
+          Income statement for the selected period: revenue, expenses, and net income on an accrual basis from recorded
+          activity.
         </p>
       </div>
 

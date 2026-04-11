@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, Link } from 'react-router-dom';
 import { FileBarChart, Scale, TrendingUp, BookOpen, ArrowRightLeft, Landmark } from 'lucide-react';
 
 const links = [
@@ -16,10 +16,16 @@ const ReportsLayout = () => {
     <div className="space-y-8">
       <div className="border-b border-border pb-6">
         <h1 className="text-3xl font-bold text-text tracking-tight">Financial reporting</h1>
-        <p className="text-sm text-text-secondary mt-2 max-w-2xl font-medium">
-          Standard statements from ledger activity. Use date filters on each report. Balance sheet under Reports supports an
-          optional <strong className="text-text">as-of</strong> cutoff; quick access remains at{' '}
-          <code className="text-xs bg-bg px-1.5 py-0.5 rounded border border-border">/dashboard/balance-sheet</code>.
+        <p className="text-sm text-text-secondary mt-2 max-w-xl font-medium leading-relaxed">
+          Set period or as-of on each report before export. Balance sheet here accepts an optional as-of; the same view is
+          available{' '}
+          <Link
+            to="/dashboard/balance-sheet"
+            className="text-primary font-semibold hover:underline underline-offset-2"
+          >
+            standalone
+          </Link>
+          .
         </p>
       </div>
 

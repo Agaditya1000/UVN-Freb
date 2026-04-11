@@ -28,15 +28,20 @@ const GeneralLedgerReport = () => {
   };
 
   if (!activeBusiness) {
-    return <p className="text-text-secondary text-sm font-medium">Select a business to run reports.</p>;
+    return (
+      <p className="text-text-secondary text-sm font-medium">
+        Select a business unit to generate financial reports.
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-text">General ledger</h2>
-        <p className="text-sm text-text-secondary mt-1 font-medium">
-          Detailed movements for one account, with running balance.
+        <p className="text-sm text-text-secondary mt-1 font-medium leading-relaxed">
+          Chronological detail for a single account within the selected period, including a running balance after each
+          entry.
         </p>
       </div>
 
