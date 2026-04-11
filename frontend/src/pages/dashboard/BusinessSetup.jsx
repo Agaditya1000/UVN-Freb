@@ -45,7 +45,7 @@ const BusinessSetup = () => {
     }
   };
 
-  const taxLabel = country === 'USA' ? 'EIN' : country === 'EU' ? 'VAT Number' : 'GSTIN';
+  const taxLabel = currency === 'USD' ? 'EIN' : currency === 'EUR' ? 'VAT' : 'GST';
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">

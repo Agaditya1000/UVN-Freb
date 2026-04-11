@@ -1,0 +1,12 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\Users\anshu\OneDrive\Desktop\UV\UVN-P1_SAAS\frontend\src\contexts\AppContext.jsx
+  5:1   warning  Unused eslint-disable directive (no problems were reported from 'react-refresh/only-export-components')
+  7:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+Γ£û 2 problems (1 error, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

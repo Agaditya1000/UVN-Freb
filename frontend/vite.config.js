@@ -28,6 +28,7 @@ export default defineConfig({
       ],
     },
   },
-
+  // Ensure the root is explicitly this project's directory
+  // eslint-disable-next-line no-undef
   root: path.resolve(__dirname, '.'),
 })
