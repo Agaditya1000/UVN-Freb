@@ -1,0 +1,13 @@
+.DS_Store
+
+# Frontend build/deps
+frontend/node_modules
+frontend/dist
+
+# Local env
+frontend/.env.local
+frontend/.env.*.local
+
+# Local debug outputs
+frontend/build_err*.txt
+frontend/lint_output.txt
