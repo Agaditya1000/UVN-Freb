@@ -27,7 +27,9 @@ const TrialBalanceReport = () => {
 
   if (!activeBusiness) {
     return (
-      <p className="text-text-secondary text-sm font-medium">Select a business to run reports.</p>
+      <p className="text-text-secondary text-sm font-medium">
+        Select a business unit to generate financial reports.
+      </p>
     );
   }
 
@@ -35,8 +37,9 @@ const TrialBalanceReport = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-text">Trial balance</h2>
-        <p className="text-sm text-text-secondary mt-1 font-medium">
-          Period activity: debits and credits per account. Totals must agree.
+        <p className="text-sm text-text-secondary mt-1 font-medium leading-relaxed">
+          Lists debit and credit totals by account for the selected period. In a balanced ledger, aggregate debits equal
+          aggregate credits.
         </p>
       </div>
 
@@ -74,10 +77,11 @@ const TrialBalanceReport = () => {
           >
             {result.balanced ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
             {result.balanced ? (
-              <span>Debits and credits tie for this period.</span>
+              <span>Debit and credit totals are in balance for this period.</span>
             ) : (
               <span>
-                Variance {result.delta.toFixed(2)} — check unbalanced or out-of-range transactions.
+                Out of balance by {result.delta.toFixed(2)}. Review journal entries in this period for missing lines or
+                amounts that do not balance.
               </span>
             )}
           </div>

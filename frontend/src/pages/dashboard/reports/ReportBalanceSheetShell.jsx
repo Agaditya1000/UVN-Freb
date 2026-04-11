@@ -2,10 +2,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import BalanceSheet from '../BalanceSheet';
 
-/**
- * Reporting entry for balance sheet: same component as /dashboard/balance-sheet
- * with an explicit as-of control synced to ?asOf=
- */
+/** Balance sheet under Financial reporting: optional as-of date via query string. */
 const ReportBalanceSheetShell = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const asOf = searchParams.get('asOf') ?? '';
@@ -22,7 +19,7 @@ const ReportBalanceSheetShell = () => {
       <div className="flex flex-wrap items-end gap-4 p-4 rounded-2xl border border-border bg-bg">
         <div>
           <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1.5">
-            As of (optional cutoff)
+            Report date (as of)
           </label>
           <input
             type="date"
@@ -36,12 +33,13 @@ const ReportBalanceSheetShell = () => {
           onClick={() => onChangeAsOf('')}
           className="text-sm font-semibold text-primary hover:underline mb-2"
         >
-          Clear — use all loaded activity
+          Clear date — cumulative balances
         </button>
       </div>
       {!asOf && (
-        <p className="text-xs text-text-secondary font-medium">
-          No cutoff: balances match the main dashboard balance sheet (all transactions in context).
+        <p className="text-xs text-text-secondary font-medium leading-relaxed">
+          No report date selected: amounts reflect all activity currently loaded for this business (same basis as the
+          standalone balance sheet view).
         </p>
       )}
       <BalanceSheet />

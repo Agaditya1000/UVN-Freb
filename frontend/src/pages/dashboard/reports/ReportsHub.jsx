@@ -10,31 +10,31 @@ const ReportsHub = () => {
   const cards = [
     {
       title: 'Trial balance',
-      desc: 'Debit and credit totals by account for a period. Debits should equal credits.',
+      desc: 'List of accounts with debit and credit totals for a period. Total debits must equal total credits.',
       to: `/dashboard/reports/trial-balance?from=${from}&to=${to}`,
       icon: Scale,
     },
     {
       title: 'Profit & loss',
-      desc: 'Revenue and expense activity for a period and net income.',
+      desc: 'Income statement: revenue and expenses for a period, with net income.',
       to: `/dashboard/reports/profit-loss?from=${from}&to=${to}`,
       icon: TrendingUp,
     },
     {
       title: 'General ledger',
-      desc: 'Chronological lines for one account with a running balance.',
+      desc: 'Detailed activity for a single account, in date order, with a running balance.',
       to: '/dashboard/reports/general-ledger',
       icon: BookOpen,
     },
     {
       title: 'Balance sheet',
-      desc: 'Statement of financial position with optional as-of cutoff.',
+      desc: 'Statement of financial position: assets, liabilities, and equity at a selected date.',
       to: `/dashboard/reports/balance-sheet?asOf=${asOf}`,
       icon: Landmark,
     },
     {
       title: 'Cash flow',
-      desc: 'Indirect cash flow statement (coming next; requires stable P&L and BS).',
+      desc: 'Statement of cash flows — available in a future release.',
       to: '/dashboard/reports/cash-flow',
       icon: ArrowRightLeft,
     },
@@ -42,8 +42,9 @@ const ReportsHub = () => {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-text-secondary font-medium">
-        Choose a report. Default links use the current calendar month or today’s date where relevant.
+      <p className="text-sm text-text-secondary font-medium leading-relaxed">
+        Select a report below. Shortcuts open with the current month as the default period, or today’s date for the balance
+        sheet as-of view. Adjust dates on each report before exporting.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map(({ title, desc, to, icon: Icon }) => (
