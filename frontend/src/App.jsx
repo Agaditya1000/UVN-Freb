@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -13,7 +15,8 @@ import Overview from './pages/dashboard/Overview';
 import BusinessSetup from './pages/dashboard/BusinessSetup';
 import ChartOfAccounts from './pages/dashboard/ChartOfAccounts';
 import Transactions from './pages/dashboard/Transactions';
-import Reports from './pages/dashboard/Reports';
+import BalanceSheet from './pages/dashboard/BalanceSheet';
+import Profile from './pages/dashboard/Profile';
 
 function App() {
   return (
@@ -21,21 +24,25 @@ function App() {
     <AuthProvider>
     <AppProvider>
       <Router>
-        <div className="min-h-screen bg-black text-lightWhite antialiased">
+        <div className="min-h-screen bg-bg text-text antialiased transition-colors duration-300">
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Register />} />
+            <Route path="/" element={<Landing />}>
+              <Route path="login" element={<Login />} />
+              <Route path="signup" element={<Register />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
+              <Route path="reset-password" element={<ResetPassword />} />
+            </Route>
             
             <Route 
               path="/dashboard" 
               element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} 
             >
               <Route index element={<Overview />} />
-              <Route path="business" element={<BusinessSetup />} />
+              <Route path="business" element={<ProtectedRoute allowedRoles={['Owner']}><BusinessSetup /></ProtectedRoute>} />
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="transactions" element={<Transactions />} />
-              <Route path="reports" element={<Reports />} />
+              <Route path="balance-sheet" element={<BalanceSheet />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             
             <Route 

@@ -1,70 +1,201 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
+import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
 
 export const useApp = () => useContext(AppContext);
 
 export const AppProvider = ({ children }) => {
-  const [businesses, setBusinesses] = useState([
-    { id: '1', name: 'Acme Corp', country: 'USA', currency: 'USD', taxId: 'EIN-123456' },
-  ]);
-  const [activeBusinessId, setActiveBusinessId] = useState('1');
+  const { user, role } = useAuth();
+  
+  const [businesses, setBusinesses] = useState([]);
+  const [activeBusinessId, setActiveBusinessId] = useState(null);
+  
+  const [accounts, setAccounts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [accounts, setAccounts] = useState([
-    { id: '100', name: 'Cash', category: 'Asset', balance: 50000 },
-    { id: '120', name: 'Accounts Receivable', category: 'Asset', balance: 10000 },
-    { id: '200', name: 'Accounts Payable', category: 'Liability', balance: 5000 },
-    { id: '300', name: 'Owner Equity', category: 'Equity', balance: 55000 },
-    { id: '400', name: 'Sales Revenue', category: 'Revenue', balance: 0 },
-    { id: '500', name: 'Operating Expense', category: 'Expense', balance: 0 },
-  ]);
+  // Fetch businesses user has access to
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadBusinesses = async () => {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (!error && data) {
+        setBusinesses(data);
+        if (data.length > 0 && !activeBusinessId) {
+          setActiveBusinessId(data[0].id);
+        }
+      }
+    };
+    
+    loadBusinesses();
+  }, [user]);
 
-  const [transactions, setTransactions] = useState([
-    { id: 't1', date: '2026-04-01', description: 'Initial Capital', debits: [{ accountId: '100', amount: 55000 }], credits: [{ accountId: '300', amount: 55000 }] },
-  ]);
+  // Fetch accounts and transactions when activeBusinessId changes
+  useEffect(() => {
+    if (!activeBusinessId) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      
+      // Load Accounts
+      const { data: accData, error: accError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('business_id', activeBusinessId)
+        .order('id', { ascending: true });
+      
+      if (!accError && accData) setAccounts(accData);
+
+      // Load Transactions
+      const { data: transData, error: transError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('business_id', activeBusinessId)
+        .order('date', { ascending: false });
+
+      if (!transError && transData) setTransactions(transData);
+      
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [activeBusinessId]);
 
   const activeBusiness = businesses.find(b => b.id === activeBusinessId) || null;
 
-  const addBusiness = (businessData) => {
-    const newBusiness = { id: Date.now().toString(), ...businessData };
-    setBusinesses([...businesses, newBusiness]);
-    setActiveBusinessId(newBusiness.id);
+  // Insert business and map it to the user
+  const addBusiness = async (businessData) => {
+    if (!user) return { success: false, error: 'No User' };
+    
+    const newId = crypto.randomUUID();
+
+    const { error: bError } = await supabase
+      .from('businesses')
+      .insert([{ id: newId, ...businessData }]);
+      
+    if (bError) return { success: false, error: bError };
+    
+    const { error: mapError } = await supabase
+      .from('business_users')
+      .insert([{
+        business_id: newId,
+        user_id: user.id,
+        role: 'Owner'
+      }]);
+      
+    if (mapError) return { success: false, error: mapError };
+    
+    const newBusiness = { id: newId, ...businessData };
+    setBusinesses(prev => [newBusiness, ...prev]);
+    setActiveBusinessId(newId);
+    return { success: true };
   };
 
-  const addAccount = (accountData) => {
-    setAccounts([...accounts, { id: Date.now().toString(), balance: 0, ...accountData }]);
+  const addAccount = async (accountData) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { data, error } = await supabase
+      .from('accounts')
+      .insert([{ 
+        business_id: activeBusinessId,
+        ...accountData,
+        balance: accountData.balance || 0
+      }])
+      .select();
+
+    if (error) return { success: false, error };
+
+    setAccounts(prev => [...prev, data[0]]);
+    return { success: true };
   };
 
-  const addTransaction = (tData) => {
-    setTransactions([{ id: Date.now().toString(), ...tData }, ...transactions]);
+  const addTransaction = async (tData) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
 
-    setAccounts(prevAccounts => {
-      const updatedAccounts = [...prevAccounts];
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([{ 
+        business_id: activeBusinessId,
+        ...tData 
+      }])
+      .select();
 
-      const updateBalance = (accountId, amount, isDebit) => {
-        const accIdx = updatedAccounts.findIndex(a => a.id === accountId);
-        if (accIdx > -1) {
-          const acc = updatedAccounts[accIdx];
-          // Assets & Expenses increase with Debits, decrease with Credits.
-          // Liabilities, Equity, Revenue increase with Credits, decrease with Debits.
-          const isAssetOrExpense = acc.category === 'Asset' || acc.category === 'Expense';
-          
-          let balanceChange = 0;
-          if (isDebit) {
-            balanceChange = isAssetOrExpense ? amount : -amount;
+    if (error) return { success: false, error };
+
+    setTransactions(prev => [data[0], ...prev]);
+    return { success: true };
+  };
+
+  // Calculate balances dynamically from transactions
+  const accountsWithBalances = accounts.map(account => {
+    let balance = 0;
+    
+    transactions.forEach(tx => {
+      // Check debits
+      tx.debits?.forEach(d => {
+        if (d.accountId === account.id) {
+          if (['Asset', 'Expense'].includes(account.category)) {
+            balance += d.amount;
           } else {
-            balanceChange = isAssetOrExpense ? -amount : amount;
+            balance -= d.amount;
           }
-          
-          updatedAccounts[accIdx] = { ...acc, balance: acc.balance + balanceChange };
         }
-      };
-
-      if (tData.debits) tData.debits.forEach(d => updateBalance(d.accountId, d.amount, true));
-      if (tData.credits) tData.credits.forEach(c => updateBalance(c.accountId, c.amount, false));
-
-      return updatedAccounts;
+      });
+      
+      // Check credits
+      tx.credits?.forEach(c => {
+        if (c.accountId === account.id) {
+          if (['Asset', 'Expense'].includes(account.category)) {
+            balance -= c.amount;
+          } else {
+            balance += c.amount;
+          }
+        }
+      });
     });
+
+    return { ...account, balance };
+  });
+
+  const updateAccount = async (accountId, businessId, updatedData) => {
+    // Remove keys that involve the identity of the record
+    const { id, business_id, ...dataToUpdate } = updatedData;
+    
+    const { data, error } = await supabase
+      .from('accounts')
+      .update(dataToUpdate)
+      .eq('id', accountId)
+      .eq('business_id', businessId)
+      .select();
+
+    if (error) return { success: false, error };
+    
+    if (data && data.length > 0) {
+      setAccounts(prev => prev.map(acc => (acc.id === accountId && acc.business_id === businessId) ? data[0] : acc));
+      return { success: true };
+    }
+    return { success: false, error: 'Authorization error or record not found' };
+  };
+
+  const deleteAccount = async (accountId, businessId) => {
+    const { error } = await supabase
+      .from('accounts')
+      .delete()
+      .eq('id', accountId)
+      .eq('business_id', businessId);
+
+    if (error) return { success: false, error };
+
+    setAccounts(prev => prev.filter(acc => !(acc.id === accountId && acc.business_id === businessId)));
+    return { success: true };
   };
 
   const value = {
@@ -72,10 +203,13 @@ export const AppProvider = ({ children }) => {
     activeBusiness,
     setActiveBusinessId,
     addBusiness,
-    accounts,
+    accounts: accountsWithBalances,
     addAccount,
+    updateAccount,
+    deleteAccount,
     transactions,
-    addTransaction
+    addTransaction,
+    loading
   };
 
   return (

@@ -11,4 +11,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const finalUrl = supabaseUrl || 'https://placeholder.supabase.co';
 const finalKey = supabaseAnonKey || 'public-anon-key';
 
-export const supabase = createClient(finalUrl, finalKey);
+/** Base URL for auth redirects (password reset, OAuth). Set VITE_SITE_URL in production if origin differs. */
+export function getAuthRedirectOrigin() {
+  const fromEnv = import.meta.env.VITE_SITE_URL;
+  if (fromEnv && typeof fromEnv === 'string') {
+    return fromEnv.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return '';
+}
+
+export const supabase = createClient(finalUrl, finalKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
