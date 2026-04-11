@@ -17,6 +17,13 @@ import ChartOfAccounts from './pages/dashboard/ChartOfAccounts';
 import Transactions from './pages/dashboard/Transactions';
 import BalanceSheet from './pages/dashboard/BalanceSheet';
 import Profile from './pages/dashboard/Profile';
+import ReportsLayout from './pages/dashboard/reports/ReportsLayout';
+import ReportsHub from './pages/dashboard/reports/ReportsHub';
+import TrialBalanceReport from './pages/dashboard/reports/TrialBalanceReport';
+import ProfitLossReport from './pages/dashboard/reports/ProfitLossReport';
+import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
+import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
+import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
 
 function App() {
   return (
@@ -42,6 +49,14 @@ function App() {
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="balance-sheet" element={<BalanceSheet />} />
+              <Route path="reports" element={<ReportsLayout />}>
+                <Route index element={<ReportsHub />} />
+                <Route path="trial-balance" element={<TrialBalanceReport />} />
+                <Route path="profit-loss" element={<ProfitLossReport />} />
+                <Route path="general-ledger" element={<GeneralLedgerReport />} />
+                <Route path="balance-sheet" element={<ReportBalanceSheetShell />} />
+                <Route path="cash-flow" element={<CashFlowReport />} />
+              </Route>
               <Route path="profile" element={<Profile />} />
             </Route>
             

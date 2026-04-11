@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
@@ -21,6 +20,7 @@ const DashboardLayout = () => {
   const { theme } = useTheme();
   const { businesses, activeBusiness, setActiveBusinessId } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -45,9 +45,12 @@ const DashboardLayout = () => {
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
     { name: 'Accounts', path: '/dashboard/accounts' },
     { name: 'Transactions', path: '/dashboard/transactions' },
-    { name: 'Reporting', path: '/dashboard/balance-sheet' },
+    { name: 'Reporting', path: '/dashboard/reports' },
     { name: 'Business', path: '/dashboard/business', icon: <Settings size={18} /> },
   ];
+
+  const isReportingActive =
+    location.pathname.startsWith('/dashboard/reports') || location.pathname === '/dashboard/balance-sheet';
 
   return (
     <div className="bg-bg text-text min-h-screen transition-colors duration-300">
@@ -137,12 +140,16 @@ const DashboardLayout = () => {
               key={item.name}
               to={item.path}
               end={item.path === '/dashboard'}
-              className={({ isActive }) =>
-                `px-5 py-2 text-sm font-semibold rounded-xl transition-all
-                ${isActive
+              className={({ isActive }) => {
+                const active =
+                  item.path === '/dashboard/reports'
+                    ? isReportingActive
+                    : isActive;
+                return `px-5 py-2 text-sm font-semibold rounded-xl transition-all
+                ${active
                   ? 'bg-surface text-primary shadow-sm border border-border ring-1 ring-border'
-                  : 'text-text-secondary hover:text-text hover:bg-surface/50'}`
-              }
+                  : 'text-text-secondary hover:text-text hover:bg-surface/50'}`;
+              }}
             >
               {item.name}
             </NavLink>
@@ -222,10 +229,15 @@ const DashboardLayout = () => {
                   key={item.name}
                   to={item.path}
                   onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-5 py-4 rounded-2xl font-bold transition-all
-                    ${isActive ? 'bg-primary/10 text-primary' : 'bg-bg text-text-secondary'}`
-                  }
+                  end={item.path === '/dashboard'}
+                  className={({ isActive }) => {
+                    const active =
+                      item.path === '/dashboard/reports'
+                        ? isReportingActive
+                        : isActive;
+                    return `flex items-center justify-between px-5 py-4 rounded-2xl font-bold transition-all
+                    ${active ? 'bg-primary/10 text-primary' : 'bg-bg text-text-secondary'}`;
+                  }}
                 >
                   {item.name}
                 </NavLink>
@@ -281,4 +293,3 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
-
