@@ -6,8 +6,10 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true, // ✅ allow external access
+    allowedHosts: ['.trycloudflare.com'], // ✅ allow Cloudflare tunnel
+
     watch: {
-      // Prevent Vite from watching outside the project directory
       ignored: [
         '**/node_modules/**',
         '**/.git/**',
@@ -26,7 +28,11 @@ export default defineConfig({
       ],
     },
   },
+<<<<<<< HEAD
   // Ensure the root is explicitly this project's directory
   // eslint-disable-next-line no-undef
+=======
+
+>>>>>>> 00a28e2ec03ecff1af9b56f5dfb4a09085a0c0f6
   root: path.resolve(__dirname, '.'),
 })
