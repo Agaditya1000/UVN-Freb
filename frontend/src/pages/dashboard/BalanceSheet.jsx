@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { ChevronDown, FileText, Table as TableIcon, Calendar, Clock, Landmark, ShieldCheck, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { computeAllBalances, filterTransactionsAsOf } from '../../utils/reporting';
 
 const BalanceSheet = () => {
-  const { activeBusiness, accounts } = useApp();
+  const { activeBusiness, accounts: contextAccounts, transactions } = useApp();
+  const [searchParams] = useSearchParams();
+  const asOfParam = searchParams.get('asOf');
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -14,6 +18,25 @@ const BalanceSheet = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  const accounts = useMemo(() => {
+    if (!contextAccounts?.length) return contextAccounts || [];
+    if (asOfParam) {
+      const filtered = filterTransactionsAsOf(transactions || [], asOfParam);
+      return computeAllBalances(contextAccounts, filtered);
+    }
+    return contextAccounts;
+  }, [asOfParam, transactions, contextAccounts]);
+
+  const statementDateLabel = useMemo(() => {
+    if (asOfParam) {
+      const d = new Date(`${asOfParam}T12:00:00`);
+      return Number.isNaN(d.getTime())
+        ? asOfParam
+        : d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+    return currentTime.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+  }, [asOfParam, currentTime]);
 
   if (!activeBusiness) {
     return (
@@ -53,7 +76,11 @@ const BalanceSheet = () => {
       [activeBusiness.name.toUpperCase()],
       ['STATEMENT OF FINANCIAL POSITION'],
       [`Tax ID: ${activeBusiness.tax_id || 'N/A'}`],
-      [`Generated on ${currentTime.toLocaleString()}`],
+      [
+        asOfParam
+          ? `As of ${statementDateLabel} (cutoff)`
+          : `Generated on ${currentTime.toLocaleString()}`,
+      ],
       [],
       ['ASSETS', activeBusiness.currency, '', 'LIABILITIES & EQUITY', activeBusiness.currency]
     ];
@@ -241,7 +268,11 @@ const BalanceSheet = () => {
                  Tax Identity: <span className="text-text ml-2">{activeBusiness.tax_id || 'NOT_SPECIFIED'}</span>
               </div>
               <div className="px-6 py-3 bg-bg border border-border rounded-2xl text-[11px] font-black uppercase tracking-widest text-text-secondary">
-                 As of <span className="text-text ml-2">{currentTime.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                 As of{' '}
+                 <span className="text-text ml-2">{statementDateLabel}</span>
+                 {asOfParam && (
+                   <span className="text-text-secondary text-xs font-normal ml-2">(transaction cutoff)</span>
+                 )}
               </div>
            </div>
         </div>

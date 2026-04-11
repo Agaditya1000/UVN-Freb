@@ -1,0 +1,56 @@
+import React from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+import { FileBarChart, Scale, TrendingUp, BookOpen, ArrowRightLeft, Landmark } from 'lucide-react';
+
+const links = [
+  { to: '/dashboard/reports', end: true, label: 'Overview', icon: FileBarChart },
+  { to: '/dashboard/reports/trial-balance', end: false, label: 'Trial balance', icon: Scale },
+  { to: '/dashboard/reports/profit-loss', end: false, label: 'Profit & loss', icon: TrendingUp },
+  { to: '/dashboard/reports/general-ledger', end: false, label: 'General ledger', icon: BookOpen },
+  { to: '/dashboard/reports/balance-sheet', end: false, label: 'Balance sheet', icon: Landmark },
+  { to: '/dashboard/reports/cash-flow', end: false, label: 'Cash flow', icon: ArrowRightLeft },
+];
+
+const ReportsLayout = () => {
+  return (
+    <div className="space-y-8">
+      <div className="border-b border-border pb-6">
+        <h1 className="text-3xl font-bold text-text tracking-tight">Financial reporting</h1>
+        <p className="text-sm text-text-secondary mt-2 max-w-2xl font-medium">
+          Standard statements from ledger activity. Use date filters on each report. Balance sheet under Reports supports an
+          optional <strong className="text-text">as-of</strong> cutoff; quick access remains at{' '}
+          <code className="text-xs bg-bg px-1.5 py-0.5 rounded border border-border">/dashboard/balance-sheet</code>.
+        </p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        <nav className="lg:w-56 shrink-0 space-y-1">
+          {links.map(({ to, end, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border
+                ${
+                  isActive
+                    ? 'bg-primary text-white shadow-lg shadow-primary/25 border-primary'
+                    : 'text-text-secondary hover:bg-bg hover:text-text border-transparent hover:border-border'
+                }`
+              }
+            >
+              <Icon size={18} className="shrink-0 opacity-90" />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex-1 min-w-0">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ReportsLayout;
