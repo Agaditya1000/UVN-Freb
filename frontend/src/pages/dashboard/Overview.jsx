@@ -60,52 +60,7 @@ const Overview = () => {
 
   const netIncome = totalRevenue - totalExpenses;
 
-<<<<<<< HEAD
 
-=======
-  const MetricCard = ({ title, amount, icon, isPositive }) => (
-    <div className="panel p-6 anim-fade-up">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-grayText text-sm font-bold tracking-wide uppercase mb-1">
-            {title}
-          </p>
-          <h3 className="text-2xl font-medium text-white tracking-heading">
-            {activeBusiness.currency === 'USD'
-              ? '$'
-              : activeBusiness.currency === 'EUR'
-              ? '€'
-              : '₹'}
-            {amount.toLocaleString()}
-          </h3>
-        </div>
-
-        <div
-          className={`p-2 rounded bg-black border-[1.75px] ${
-            isPositive
-              ? 'border-success text-success'
-              : isPositive === false
-              ? 'border-error text-error'
-              : 'border-borderDark text-accent'
-          }`}
-        >
-          {icon}
-        </div>
-      </div>
-
-      {isPositive !== undefined && (
-        <div
-          className={`text-xs font-medium flex items-center gap-1 ${
-            isPositive ? 'text-success' : 'text-error'
-          }`}
-        >
-          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          <span>{isPositive ? '0%' : '0%'} from last month</span>
-        </div>
-      )}
-    </div>
-  );
->>>>>>> 00a28e2ec03ecff1af9b56f5dfb4a09085a0c0f6
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -122,36 +77,10 @@ const Overview = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<<<<<<< HEAD
         <MetricCard title="Total Assets" amount={totalAssets} icon={<Landmark size={20} />} currency={activeBusiness.currency} />
         <MetricCard title="Total Liabilities" amount={totalLiabilities} icon={<DollarSign size={20} />} isPositive={false} currency={activeBusiness.currency} />
         <MetricCard title="Total Revenue" amount={totalRevenue} icon={<TrendingUp size={20} />} isPositive={true} currency={activeBusiness.currency} />
         <MetricCard title="Net Income" amount={netIncome} icon={<DollarSign size={20} />} isPositive={netIncome >= 0} currency={activeBusiness.currency} />
-=======
-        <MetricCard
-          title="Total Assets"
-          amount={totalAssets}
-          icon={<Landmark size={20} />}
-        />
-        <MetricCard
-          title="Total Liabilities"
-          amount={totalLiabilities}
-          icon={<DollarSign size={20} />}
-          isPositive={false}
-        />
-        <MetricCard
-          title="Total Revenue"
-          amount={totalRevenue}
-          icon={<TrendingUp size={20} />}
-          isPositive={true}
-        />
-        <MetricCard
-          title="Net Income"
-          amount={netIncome}
-          icon={<DollarSign size={20} />}
-          isPositive={netIncome >= 0}
-        />
->>>>>>> 00a28e2ec03ecff1af9b56f5dfb4a09085a0c0f6
       </div>
 
       {/* ✅ QUICK ACTIONS FIXED */}

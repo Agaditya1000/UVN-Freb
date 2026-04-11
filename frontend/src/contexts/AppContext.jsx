@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState } from 'react';
-=======
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
->>>>>>> 00a28e2ec03ecff1af9b56f5dfb4a09085a0c0f6
 
 const AppContext = createContext();
 
