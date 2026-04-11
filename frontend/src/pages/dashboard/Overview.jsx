@@ -1,156 +1,164 @@
-import React from 'react';
-import { useNavigate } from "react-router-dom";
-import { useApp } from '../../contexts/AppContext';
-import { DollarSign, Landmark, Building2, TrendingUp, TrendingDown } from 'lucide-react';
+    import React from 'react';
+    import { useNavigate } from "react-router-dom";
+    import { useApp } from '../../contexts/AppContext';
+    import { DollarSign, Landmark, Building2, TrendingUp, TrendingDown } from 'lucide-react';
 
-const Overview = () => {
-  const { activeBusiness, accounts } = useApp();
-  const navigate = useNavigate();
+    const Overview = () => {
+      const { activeBusiness, accounts = [] } = useApp();
+      const navigate = useNavigate();
 
-  if (!activeBusiness) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center">
-        <Building2 size={64} className="text-borderDark mb-4" />
-        <h2 className="text-2xl font-medium tracking-heading mb-2">No Active Business</h2>
-        <p className="text-grayText font-light">
-          Please select or create a business profile from the navigation menu.
-        </p>
+      if (!activeBusiness) {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text text-center">
+            <Building2 size={64} className="text-text-secondary mb-4" />
+            <h2 className="text-2xl font-bold mb-2">No Active Business</h2>
+            <p className="text-text-secondary">
+              Please select or create a business profile from the navigation menu.
+            </p>
+          </div>
+        );
+      }
+
+      const totalAssets = accounts.filter(a => a.category === 'Asset').reduce((sum, a) => sum + a.balance, 0);
+      const totalLiabilities = accounts.filter(a => a.category === 'Liability').reduce((sum, a) => sum + a.balance, 0);
+      const totalRevenue = accounts.filter(a => a.category === 'Revenue').reduce((sum, a) => sum + a.balance, 0);
+      const totalExpenses = accounts.filter(a => a.category === 'Expense').reduce((sum, a) => sum + a.balance, 0);
+      const netIncome = totalRevenue - totalExpenses;
+
+    const MetricCard = ({ title, amount, icon, desc, isPositive }) => (
+      <div className="group p-6 bg-gradient-to-br from-bg to-surface border border-border rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden">
+
+        {/* subtle glow */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition"></div>
+
+        <div className="flex justify-between items-start mb-4 relative z-10">
+          
+          <div>
+            <p className="text-text-secondary text-[11px] font-bold uppercase tracking-widest mb-2">
+              {title}
+            </p>
+
+            <h3 className="text-3xl font-bold text-text tracking-tight">
+              {activeBusiness.currency === 'USD' ? '$' : activeBusiness.currency === 'EUR' ? '€' : '₹'}
+              {amount.toLocaleString()}
+            </h3>
+
+            <p className="text-xs text-text-secondary mt-2 leading-relaxed max-w-[220px]">
+              {desc}
+            </p>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110">
+            {icon}
+          </div>
+        </div>
+
+        {isPositive !== undefined && (
+          <div className={`text-xs flex items-center gap-1 font-medium ${
+            isPositive ? 'text-green-500' : 'text-red-500'
+          }`}>
+          
+          </div>
+        )}
       </div>
     );
-  }
 
-  const totalAssets = accounts
-    .filter(a => a.category === 'Asset')
-    .reduce((sum, a) => sum + a.balance, 0);
+      return (
+        <div className="min-h-screen bg-bg text-text">
 
-  const totalLiabilities = accounts
-    .filter(a => a.category === 'Liability')
-    .reduce((sum, a) => sum + a.balance, 0);
+          <div className="max-w-6xl mx-auto space-y-10 px-6 py-10">
 
-  const totalRevenue = accounts
-    .filter(a => a.category === 'Revenue')
-    .reduce((sum, a) => sum + a.balance, 0);
+            {/* HEADER */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold">Financial Overview</h1>
+                <p className="text-text-secondary mt-2 text-lg md:text-xl font-semibold tracking-wide">
+                  Real-time financial snapshot for {activeBusiness.name}
+                </p>
+              </div>
 
-  const totalExpenses = accounts
-    .filter(a => a.category === 'Expense')
-    .reduce((sum, a) => sum + a.balance, 0);
+              <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary">
+                {activeBusiness.country} Region
+              </div>
+            </div>
 
-  const netIncome = totalRevenue - totalExpenses;
+            {/* ✅ METRICS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+              
+              <MetricCard 
+                title="Total Assets"
+                amount={totalAssets}
+                icon={<Landmark size={20} />}
+                desc="Total value of all assets owned by your business including cash and accounts."
+              />
 
-  const MetricCard = ({ title, amount, icon, isPositive }) => (
-    <div className="panel p-6 anim-fade-up">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-grayText text-sm font-bold tracking-wide uppercase mb-1">
-            {title}
-          </p>
-          <h3 className="text-2xl font-medium text-white tracking-heading">
-            {activeBusiness.currency === 'USD'
-              ? '$'
-              : activeBusiness.currency === 'EUR'
-              ? '€'
-              : '₹'}
-            {amount.toLocaleString()}
-          </h3>
+              <MetricCard 
+                title="Total Liabilities"
+                amount={totalLiabilities}
+                icon={<DollarSign size={20} />}
+                desc="Total outstanding obligations and dues payable by your business."
+                isPositive={false}
+              />
+
+              <MetricCard 
+                title="Total Revenue"
+                amount={totalRevenue}
+                icon={<TrendingUp size={20} />}
+                desc="Total income generated from all business operations over time."
+                isPositive={true}
+              />
+
+              <MetricCard 
+                title="Net Income"
+                amount={netIncome}
+                icon={<DollarSign size={20} />}
+                desc="Net profit after deducting all expenses from total revenue."
+                isPositive={netIncome >= 0}
+              />
+
+            </div>
+
+            {/* QUICK ACTIONS */}
+            <div>
+              <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { title: "Record Transaction", desc: "Add income or expense entry", icon: <DollarSign size={20} />, path: "transactions" },
+                  { title: "Add Account", desc: "Create a new ledger account", icon: <Landmark size={20} />, path: "accounts" },
+                  { title: "Balance Sheet", desc: "Generate reports", icon: <TrendingUp size={20} />, path: "balance-sheet" }
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    onClick={() => navigate(item.path)}
+                    className="p-5 bg-surface border border-border rounded-2xl hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                        {item.icon}
+                      </div>
+                      <div>
+                        <p className="font-bold text-text">{item.title}</p>
+                        <p className="text-xs text-text-secondary">{item.desc}</p>
+                      </div>
+                    </div>
+                    <span className="text-text-secondary">→</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* FOOTER */}
+          <footer className="max-w-6xl mx-auto border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-text-secondary font-bold uppercase tracking-widest gap-4">
+            <div className="w-full text-center">
+              <span>© 2026 UV Netware. Engineered for precision.</span>
+            </div>
+          </footer>
+
         </div>
+      );
+    };
 
-        <div
-          className={`p-2 rounded bg-black border-[1.75px] ${
-            isPositive
-              ? 'border-success text-success'
-              : isPositive === false
-              ? 'border-error text-error'
-              : 'border-borderDark text-accent'
-          }`}
-        >
-          {icon}
-        </div>
-      </div>
-
-      {isPositive !== undefined && (
-        <div
-          className={`text-xs font-medium flex items-center gap-1 ${
-            isPositive ? 'text-success' : 'text-error'
-          }`}
-        >
-          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          <span>{isPositive ? '0%' : '0%'} from last month</span>
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center border-b-[1.75px] border-borderDark pb-4">
-        <div>
-          <h1 className="text-3xl font-medium tracking-heading text-white">
-            Financial Overview
-          </h1>
-          <p className="text-grayText font-light mt-1 text-sm">
-            Real-time snapshot for {activeBusiness.name}
-          </p>
-        </div>
-        <div className="teal-badge">{activeBusiness.country} Region</div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total Assets"
-          amount={totalAssets}
-          icon={<Landmark size={20} />}
-        />
-        <MetricCard
-          title="Total Liabilities"
-          amount={totalLiabilities}
-          icon={<DollarSign size={20} />}
-          isPositive={false}
-        />
-        <MetricCard
-          title="Total Revenue"
-          amount={totalRevenue}
-          icon={<TrendingUp size={20} />}
-          isPositive={true}
-        />
-        <MetricCard
-          title="Net Income"
-          amount={netIncome}
-          icon={<DollarSign size={20} />}
-          isPositive={netIncome >= 0}
-        />
-      </div>
-
-      {/* ✅ QUICK ACTIONS FIXED */}
-      <div className="panel p-8 mt-8 border-t-[1.75px] border-accent anim-fade-up anim-delay-2">
-        <h3 className="text-xl font-medium tracking-heading mb-4">
-          Quick Actions
-        </h3>
-
-        <div className="flex flex-wrap gap-4">
-          <button
-            onClick={() => navigate("transactions")}
-            className="btn-primary text-sm shrink-0"
-          >
-            Record Transaction
-          </button>
-
-          <button
-            onClick={() => navigate("accounts")}
-            className="btn-ghost text-sm shrink-0"
-          >
-            Add Account
-          </button>
-
-          <button
-            onClick={() => navigate("balance-sheet")}
-            className="btn-ghost text-sm shrink-0"
-          >
-            Generate Balance Sheet
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Overview;
+    export default Overview;
