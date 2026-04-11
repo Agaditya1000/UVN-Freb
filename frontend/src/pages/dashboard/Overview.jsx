@@ -2,6 +2,7 @@
     import { useNavigate } from "react-router-dom";
     import { useApp } from '../../contexts/AppContext';
     import { DollarSign, Landmark, Building2, TrendingUp, TrendingDown } from 'lucide-react';
+    import Footer from '../../components/Footer';
 
     const Overview = () => {
       const { activeBusiness, accounts = [] } = useApp();
@@ -150,12 +151,7 @@
 
           </div>
 
-          {/* FOOTER */}
-          <footer className="max-w-6xl mx-auto border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-text-secondary font-bold uppercase tracking-widest gap-4">
-            <div className="w-full text-center">
-              <span>© 2026 UV Netware. Engineered for precision.</span>
-            </div>
-          </footer>
+          <Footer />
 
         </div>
       );
