@@ -108,7 +108,6 @@ const CashFlowReport = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
