@@ -15,6 +15,8 @@ export const AppProvider = ({ children }) => {
   
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [team, setTeam] = useState([]);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Fetch businesses user has access to
@@ -38,36 +40,64 @@ export const AppProvider = ({ children }) => {
     loadBusinesses();
   }, [user]);
 
-  // Fetch accounts and transactions when activeBusinessId changes
+  // Fetch data when activeBusinessId changes
   useEffect(() => {
-    if (!activeBusinessId) return;
+    if (!activeBusinessId || !user) return;
 
     const fetchData = async () => {
       setLoading(true);
       
-      // Load Accounts
-      const { data: accData, error: accError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('business_id', activeBusinessId)
-        .order('id', { ascending: true });
-      
-      if (!accError && accData) setAccounts(accData);
+      try {
+        // 1. Load Current User's Role for this business
+        const { data: roleData, error: roleError } = await supabase
+          .from('business_users')
+          .select('role')
+          .eq('business_id', activeBusinessId)
+          .eq('user_id', user.id)
+          .single();
+        
+        if (!roleError && roleData) {
+          setUserRole(roleData.role);
+        } else {
+          setUserRole(null);
+        }
 
-      // Load Transactions
-      const { data: transData, error: transError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('business_id', activeBusinessId)
-        .order('date', { ascending: false });
+        // 2. Load Accounts
+        const { data: accData, error: accError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('business_id', activeBusinessId)
+          .order('id', { ascending: true });
+        
+        if (!accError && accData) setAccounts(accData);
 
-      if (!transError && transData) setTransactions(transData);
-      
-      setLoading(false);
+        // 3. Load Transactions
+        const { data: transData, error: transError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('business_id', activeBusinessId)
+          .order('date', { ascending: false });
+
+        if (!transError && transData) setTransactions(transData);
+        
+        // 4. Load Team Members (if possible)
+        const { data: teamData, error: teamError } = await supabase
+          .from('business_users')
+          .select('*, users(email, full_name, id)')
+          .eq('business_id', activeBusinessId);
+        
+        if (!teamError && teamData) {
+          setTeam(teamData);
+        }
+      } catch (err) {
+        console.error("Critical error fetching context data:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-  }, [activeBusinessId]);
+  }, [activeBusinessId, user]);
 
   const activeBusiness = businesses.find(b => b.id === activeBusinessId) || null;
 
@@ -198,6 +228,55 @@ export const AppProvider = ({ children }) => {
     return { success: true };
   };
 
+  const assignUser = async (email, role) => {
+    if (!activeBusinessId) return { success: false, error: 'No active business' };
+
+    // 1. Find user by email
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (userError || !userData) return { success: false, error: 'User not found' };
+
+    // 2. Insert into business_users
+    const { error: assignError } = await supabase
+      .from('business_users')
+      .insert([{
+        business_id: activeBusinessId,
+        user_id: userData.id,
+        role: role
+      }]);
+
+    if (assignError) return { success: false, error: assignError };
+
+    // Refresh team
+    const { data: teamData } = await supabase
+      .from('business_users')
+      .select('*, users(email, full_name, id)')
+      .eq('business_id', activeBusinessId);
+    
+    if (teamData) setTeam(teamData);
+
+    return { success: true };
+  };
+
+  const revokeUser = async (userId) => {
+    if (!activeBusinessId) return { success: false, error: 'No active business' };
+
+    const { error } = await supabase
+      .from('business_users')
+      .delete()
+      .eq('business_id', activeBusinessId)
+      .eq('user_id', userId);
+
+    if (error) return { success: false, error };
+
+    setTeam(prev => prev.filter(t => t.user_id !== userId));
+    return { success: true };
+  };
+
   const value = {
     businesses,
     activeBusiness,
@@ -209,7 +288,11 @@ export const AppProvider = ({ children }) => {
     deleteAccount,
     transactions,
     addTransaction,
-    loading
+    loading,
+    userRole,
+    team,
+    assignUser,
+    revokeUser
   };
 
   return (

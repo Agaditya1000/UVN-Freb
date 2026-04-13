@@ -9,7 +9,7 @@ import {
 import Footer from '../../components/Footer';
 
 const ChartOfAccounts = () => {
-  const { activeBusiness, accounts, addAccount, updateAccount, deleteAccount } = useApp();
+  const { activeBusiness, accounts, addAccount, updateAccount, deleteAccount, userRole } = useApp();
   
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add', 'edit', 'delete'
@@ -251,27 +251,34 @@ const ChartOfAccounts = () => {
                                </div>
                             </td>
                             <td className="px-8 py-6 text-right">
-                               {editable ? (
-                                 <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                    <button 
-                                      onClick={() => openEditModal(acc)}
-                                      className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                                      title={`Editable for ${daysRemaining} more days`}
-                                    >
-                                      <Edit size={18} />
-                                    </button>
-                                    <button 
-                                      onClick={() => openDeleteModal(acc)}
-                                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                                      title="Delete record"
-                                    >
-                                      <Trash2 size={18} />
-                                    </button>
-                                 </div>
+                               {userRole !== 'Viewer' ? (
+                                 editable ? (
+                                   <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                      <button 
+                                        onClick={() => openEditModal(acc)}
+                                        className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                        title={`Editable for ${daysRemaining} more days`}
+                                      >
+                                        <Edit size={18} />
+                                      </button>
+                                      <button 
+                                        onClick={() => openDeleteModal(acc)}
+                                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                        title="Delete record"
+                                      >
+                                        <Trash2 size={18} />
+                                      </button>
+                                   </div>
+                                 ) : (
+                                   <div className="flex items-center justify-end gap-2 text-text-secondary" title="Audit Locked: Permanent Ledger Record">
+                                      <ShieldCheck size={18} className="opacity-40" />
+                                      <span className="text-[9px] font-black uppercase tracking-[0.1em]">Locked</span>
+                                   </div>
+                                 )
                                ) : (
-                                 <div className="flex items-center justify-end gap-2 text-text-secondary" title="Audit Locked: Permanent Ledger Record">
+                                 <div className="flex items-center justify-end gap-2 text-text-secondary">
                                     <ShieldCheck size={18} className="opacity-40" />
-                                    <span className="text-[9px] font-black uppercase tracking-[0.1em]">Locked</span>
+                                    <span className="text-[9px] font-black uppercase tracking-[0.1em]">View Only</span>
                                  </div>
                                )}
                             </td>
