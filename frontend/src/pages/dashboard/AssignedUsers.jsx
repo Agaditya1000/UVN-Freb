@@ -1,0 +1,234 @@
+import React, { useState } from 'react';
+import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { 
+  Users, 
+  User,
+  UserPlus, 
+  ShieldCheck, 
+  Trash2, 
+  Mail, 
+  UserCircle,
+  AlertCircle,
+  Loader2,
+  CheckCircle2
+} from 'lucide-react';
+import { Navigate } from 'react-router-dom';
+
+const AssignedUsers = () => {
+  const { user } = useAuth();
+  const { activeBusiness, userRole, team, assignUser, revokeUser, loading } = useApp();
+  
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('Viewer');
+  const [status, setStatus] = useState({ type: '', msg: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Security: Only owners can access this page
+  if (!loading && userRole !== 'Owner') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  const handleAssign = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmitting(true);
+    setStatus({ type: '', msg: '' });
+
+    const result = await assignUser(email, role);
+
+    if (result.success) {
+      setStatus({ type: 'success', msg: `Successfully assigned ${email} as ${role}` });
+      setEmail('');
+    } else {
+      setStatus({ type: 'error', msg: typeof result.error === 'string' ? result.error : 'Failed to assign user. Make sure they have a registered account.' });
+    }
+    setIsSubmitting(false);
+  };
+
+  const handleRevoke = async (userId, userEmail) => {
+    if (userId === user.id) {
+      alert("You cannot revoke your own access.");
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to revoke access for ${userEmail}?`)) {
+      const result = await revokeUser(userId);
+      if (!result.success) {
+        alert("Failed to revoke access.");
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-6xl">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border pb-8">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 text-primary">
+            <div className="p-2.5 bg-primary/10 rounded-xl shadow-inner">
+              <Users size={24} />
+            </div>
+            <h2 className="text-4xl font-extrabold tracking-tight text-text">Team Access</h2>
+          </div>
+          <p className="text-text-secondary font-medium text-sm max-w-md">
+            Manage who has access to <span className="text-text font-bold">{activeBusiness?.name}</span> and their respective permissions.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* ASSIGNMENT FORM */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-surface border border-border rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden group">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
+            
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary text-white rounded-lg">
+                  <UserPlus size={18} />
+                </div>
+                <h3 className="text-lg font-bold text-text">Assign New Role</h3>
+              </div>
+
+              <form onSubmit={handleAssign} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest pl-1">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={16} />
+                    <input
+                      type="email"
+                      required
+                      placeholder="accountant@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-bg border border-border rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-text-secondary/40"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest pl-1">Access Role</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Accountant', 'Viewer'].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all ${
+                          role === r 
+                          ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' 
+                          : 'bg-bg text-text-secondary border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {status.msg && (
+                  <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-3 ${
+                    status.type === 'success' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                  }`}>
+                    {status.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    {status.msg}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100"
+                >
+                  {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={18} />}
+                  Assign Access
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div className="bg-bg border border-border p-6 rounded-3xl flex items-start gap-4">
+             <div className="p-2 bg-text-secondary/10 text-text-secondary rounded-lg">
+                <ShieldCheck size={18} />
+             </div>
+             <div>
+                <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-1">Permissions Summary</p>
+                <p className="text-[11px] text-text-secondary font-medium leading-relaxed">
+                  <span className="text-text font-bold">Accountants</span> can record transactions and edit accounts. <span className="text-text font-bold">Viewers</span> are read-only.
+                </p>
+             </div>
+          </div>
+        </div>
+
+        {/* TEAM MEMBER LIST */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-sm">
+             <div className="px-8 py-6 border-b border-border bg-slate-500/5">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <h4 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.3em]">Active Assignments ({team.length})</h4>
+                </div>
+             </div>
+
+             <div className="divide-y divide-border/50">
+                {team.length === 0 && !loading && (
+                  <div className="p-20 text-center space-y-4">
+                    <UserCircle size={48} className="mx-auto text-text-secondary opacity-20" />
+                    <p className="text-sm font-bold text-text-secondary">No additional members assigned yet.</p>
+                  </div>
+                )}
+
+                {team.map((member) => (
+                  <div key={member.user_id} className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-bg/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-surface border border-border shadow-inner flex items-center justify-center text-primary relative">
+                        <User size={20} />
+                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-surface flex items-center justify-center ${member.role === 'Owner' ? 'bg-amber-500' : 'bg-primary'}`}>
+                           <ShieldCheck size={8} className="text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-text">{member.users?.email}</p>
+                          {member.user_id === user.id && (
+                            <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">You</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-medium text-text-secondary mt-0.5 capitalize">{member.role}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                       <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                         member.role === 'Owner' 
+                         ? 'border-amber-500/20 text-amber-500 bg-amber-500/5' 
+                         : 'border-primary/20 text-primary bg-primary/5'
+                       }`}>
+                         {member.role}
+                       </div>
+                       
+                       {member.role !== 'Owner' && member.user_id !== user.id && (
+                         <button 
+                           onClick={() => handleRevoke(member.user_id, member.users?.email)}
+                           className="p-3 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                           title="Revoke Access"
+                         >
+                           <Trash2 size={18} />
+                         </button>
+                       )}
+                    </div>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AssignedUsers;
