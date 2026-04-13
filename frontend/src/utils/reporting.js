@@ -142,6 +142,119 @@ export function buildGeneralLedger(account, allTransactionsSortedAsc) {
   return lines;
 }
 
+export function buildCashFlowStatement(accounts, transactions, fromDate, toDate) {
+  const pnl = buildProfitAndLoss(accounts, filterTransactionsByRange(transactions, fromDate, toDate));
+  
+  // 1. Get Balances at Start and End
+  const startTransactions = (transactions || []).filter(t => t.date < fromDate);
+  const endTransactions = (transactions || []).filter(t => t.date <= toDate);
+  
+  const startBalances = computeAllBalances(accounts, startTransactions);
+  const endBalances = computeAllBalances(accounts, endTransactions);
+  
+  // 2. Identify Cash Accounts (Sub-categories with Cash or Bank)
+  const isCashAccount = (a) => a.category === 'Asset' && (a.name.toLowerCase().includes('cash') || a.name.toLowerCase().includes('bank') || a.sub_category.toLowerCase().includes('cash') || a.sub_category.toLowerCase().includes('bank'));
+  
+  const cashAccounts = accounts.filter(isCashAccount);
+  const beginningCash = cashAccounts.reduce((sum, a) => sum + (startBalances.find(b => b.id === a.id)?.balance || 0), 0);
+  const endingCash = cashAccounts.reduce((sum, a) => sum + (endBalances.find(b => b.id === a.id)?.balance || 0), 0);
+  
+  // 3. Operating Activities
+  const operatingActivities = [];
+  let netOperatingCash = pnl.netIncome;
+  
+  // Search for non-cash expenses like Depreciation (if any)
+  const nonCashAccounts = accounts.filter(a => a.name.toLowerCase().includes('depreciation') || a.name.toLowerCase().includes('amortization'));
+  for (const a of nonCashAccounts) {
+    const bal = computeBalanceForAccount(a, filterTransactionsByRange(transactions, fromDate, toDate));
+    if (bal !== 0) {
+      // Depreciation is usually an expense (debit), adding it back
+      const addBack = Math.abs(bal);
+      operatingActivities.push({ name: `Adjust: ${a.name}`, amount: addBack });
+      netOperatingCash += addBack;
+    }
+  }
+
+  // Changes in Working Capital
+  const workingCapitalAccounts = accounts.filter(a => 
+    !isCashAccount(a) && 
+    (a.sub_category.toLowerCase().includes('current') || a.category === 'Asset' || a.category === 'Liability') &&
+    !a.sub_category.toLowerCase().includes('fixed') &&
+    !a.sub_category.toLowerCase().includes('long-term') &&
+    a.category !== 'Equity' &&
+    a.category !== 'Revenue' &&
+    a.category !== 'Expense'
+  );
+
+  for (const a of workingCapitalAccounts) {
+    const start = startBalances.find(b => b.id === a.id)?.balance || 0;
+    const end = endBalances.find(b => b.id === a.id)?.balance || 0;
+    const delta = end - start;
+    if (delta === 0) continue;
+
+    let adjustment = 0;
+    if (a.category === 'Asset') {
+      adjustment = -delta; // Asset increase is cash outflow
+    } else {
+      adjustment = delta; // Liability increase is cash inflow
+    }
+
+    operatingActivities.push({ 
+      name: `Change in ${a.name}`, 
+      amount: adjustment 
+    });
+    netOperatingCash += adjustment;
+  }
+
+  // 4. Investing Activities
+  const investingActivities = [];
+  let netInvestingCash = 0;
+  const investingAccounts = accounts.filter(a => a.sub_category.toLowerCase().includes('fixed') || a.sub_category.toLowerCase().includes('investment'));
+  
+  for (const a of investingAccounts) {
+    const start = startBalances.find(b => b.id === a.id)?.balance || 0;
+    const end = endBalances.find(b => b.id === a.id)?.balance || 0;
+    const delta = end - start;
+    if (delta === 0) continue;
+
+    const adjustment = -delta; // Asset purchase is cash out
+    investingActivities.push({ name: delta > 0 ? `Purchase of ${a.name}` : `Sale of ${a.name}`, amount: adjustment });
+    netInvestingCash += adjustment;
+  }
+
+  // 5. Financing Activities
+  const financingActivities = [];
+  let netFinancingCash = 0;
+  const financingAccounts = accounts.filter(a => a.sub_category.toLowerCase().includes('long-term') || a.category === 'Equity');
+  
+  for (const a of financingAccounts) {
+    // Skip Retained Earnings / Net Income since we started with it in Operating
+    if (a.name.toLowerCase().includes('retained earnings') || a.name.toLowerCase().includes('profit')) continue;
+    
+    const start = startBalances.find(b => b.id === a.id)?.balance || 0;
+    const end = endBalances.find(b => b.id === a.id)?.balance || 0;
+    const delta = end - start;
+    if (delta === 0) continue;
+
+    const adjustment = delta; // Liability/Equity increase is cash in
+    financingActivities.push({ name: `Movement in ${a.name}`, amount: adjustment });
+    netFinancingCash += adjustment;
+  }
+
+  return {
+    netIncome: pnl.netIncome,
+    operatingActivities,
+    netOperatingCash,
+    investingActivities,
+    netInvestingCash,
+    financingActivities,
+    netFinancingCash,
+    netChangeInCash: netOperatingCash + netInvestingCash + netFinancingCash,
+    beginningCash,
+    endingCash
+  };
+}
+
 export function defaultPeriodDates() {
   const now = new Date();
   const y = now.getFullYear();

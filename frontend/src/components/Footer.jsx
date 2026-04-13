@@ -17,14 +17,7 @@ const Footer = () => {
                The unified system of record for the next generation of agile enterprises. Multi-standard, multi-tenant.
             </p>
          </div>
-         <div>
-            <h4 className="font-black text-[11px] mb-8 uppercase tracking-[0.3em] text-text border-l-4 border-primary pl-4">Platform</h4>
-            <ul className="space-y-4 text-sm font-bold text-text-secondary">
-               <li><Link to="/dashboard" className="hover:text-primary transition-colors">Infrastructure</Link></li>
-               <li><Link to="/dashboard/accounts" className="hover:text-primary transition-colors">API Reference</Link></li>
-               <li><Link to="/dashboard/balance-sheet" className="hover:text-primary transition-colors">Status Board</Link></li>
-            </ul>
-         </div>
+        
          <div>
             <h4 className="font-black text-[11px] mb-8 uppercase tracking-[0.3em] text-text border-l-4 border-primary pl-4">Legal</h4>
             <ul className="space-y-4 text-sm font-bold text-text-secondary">
