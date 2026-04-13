@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
@@ -63,15 +63,20 @@ const DashboardLayout = () => {
             <Menu size={24} />
           </button>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary text-white flex items-center justify-center rounded-xl shadow-lg shadow-primary/30 font-bold italic tracking-tighter shrink-0 cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate('/dashboard')}>
+          <Link
+            to="/"
+            reloadDocument
+            className="flex items-center gap-3 text-left group cursor-pointer"
+            aria-label="Go to home"
+          >
+            <div className="w-10 h-10 bg-primary text-white flex items-center justify-center rounded-xl shadow-lg shadow-primary/30 font-bold italic tracking-tighter shrink-0 cursor-pointer group-hover:scale-105 transition-transform">
               UV
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-xs sm:text-sm md:text-lg tracking-tight text-text leading-tight">UV Netware</span>
               <span className="text-primary font-black text-[8px] sm:text-[10px] md:text-xs tracking-[0.2em] uppercase -mt-0.5 sm:-mt-1">Utilities</span>
             </div>
-          </div>
+          </Link>
 
           <div className="h-8 w-[1px] bg-border mx-2 hidden md:block"></div>
 

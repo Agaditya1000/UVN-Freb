@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Globe, ShieldCheck, RefreshCw, FileText, ArrowRight,
   Building2, Users, CheckCircle2, TrendingUp, Zap,
   BarChart3, Database, Layers, MoreHorizontal
 } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import heroImage from '../assets/hero.png';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../services/supabase';
 
 const features = [
   {
@@ -61,25 +64,69 @@ const enterprisePoints = [
 ];
 
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1554224155-8d04182405f2?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1507679799987-c7377f323b5d?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1454165833444-18d72855024e?auto=format&fit=crop&q=80&w=1600"
+  heroImage,
+  "https://images.unsplash.com/photo-1554224155-8d04182405f2?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1507679799987-c7377f323b5d?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1454165833444-18d72855024e?auto=format&fit=crop&q=80&w=1200"
 ];
 
 const Landing = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const isAuthModalOpen = location.pathname === '/login' || location.pathname === '/signup';
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [activeLayer, setActiveLayer] = useState('a');
+  const [layerAIdx, setLayerAIdx] = useState(0);
+  const [layerBIdx, setLayerBIdx] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const currentIdx = activeLayer === 'a' ? layerAIdx : layerBIdx;
+
+  const preloadImage = (idx) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = HERO_IMAGES[idx];
+    });
+
+  const goToSlide = async (nextIdx) => {
+    if (nextIdx === currentIdx) return;
+    await preloadImage(nextIdx);
+
+    if (activeLayer === 'a') {
+      setLayerBIdx(nextIdx);
+      setActiveLayer('b');
+    } else {
+      setLayerAIdx(nextIdx);
+      setActiveLayer('a');
+    }
+  };
+
   useEffect(() => {
+    // Preload the first couple of slides to avoid showing an empty/gray hero.
+    void preloadImage(0);
+    void preloadImage(1);
+
     const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % HERO_IMAGES.length);
+      void goToSlide((currentIdx + 1) % HERO_IMAGES.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentIdx, activeLayer]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user && !isAuthModalOpen) {
+      navigate('/login', { replace: true });
+    }
+  }, [authLoading, user, isAuthModalOpen, navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/', { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-bg text-text font-roboto antialiased flex flex-col relative overflow-x-hidden transition-colors duration-500">
@@ -120,17 +167,21 @@ const Landing = () => {
             <div className="h-6 w-[1px] bg-border mx-1 hidden sm:block"></div>
 
             <Link
-              to="/login"
-              className="px-3 md:px-5 py-2 text-xs md:text-sm font-bold text-text-secondary hover:text-text transition-all"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
+              to={user ? '/dashboard' : '/login'}
               className="px-4 md:px-8 py-2 md:py-3 bg-primary text-white text-xs md:text-sm font-bold rounded-xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 hover:scale-105 active:scale-95"
             >
-              Get Started
+              {user ? 'Dashboard' : 'Login'}
             </Link>
+
+            {user && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-3 md:px-5 py-2 text-xs md:text-sm font-bold text-text-secondary hover:text-text transition-all"
+              >
+                Sign out
+              </button>
+            )}
 
             {/* Mobile Menu Trigger (Three Dots) - ONLY MOBILE */}
             <div className="lg:hidden relative">
@@ -183,29 +234,47 @@ const Landing = () => {
             </button>
           </div>
 
-          <div className="w-full max-w-6xl p-3 bg-surface/40 border border-border/50 rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] backdrop-blur-md relative overflow-hidden group">
-            <div className="aspect-[16/9] bg-slate-100/50 rounded-[30px] overflow-hidden relative shadow-inner">
-              {HERO_IMAGES.map((img, idx) => (
-                <div
-                  key={idx}
-                  style={{ backgroundImage: `url(${img})` }}
-                  className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out scale-110 group-hover:scale-100 ${idx === currentIdx ? 'opacity-100' : 'opacity-0'
-                    }`}
-                />
-              ))}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10 p-2 bg-black/10 backdrop-blur-md rounded-full">
-                {HERO_IMAGES.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer ${idx === currentIdx ? 'w-10 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                      }`}
-                    onClick={() => setCurrentIdx(idx)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+	          <div className="w-full max-w-6xl p-3 bg-surface/40 border border-border/50 rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] backdrop-blur-md relative overflow-hidden group">
+	            <div className="aspect-[16/9] bg-slate-100/50 rounded-[30px] overflow-hidden relative shadow-inner">
+	              <img
+	                src={HERO_IMAGES[layerAIdx]}
+	                alt=""
+	                aria-hidden="true"
+	                decoding="async"
+	                loading="eager"
+	                fetchPriority={activeLayer === 'a' && layerAIdx === 0 ? 'high' : 'auto'}
+	                referrerPolicy="no-referrer"
+	                onError={(e) => {
+	                  if (e.currentTarget.src !== heroImage) e.currentTarget.src = heroImage;
+	                }}
+	                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out scale-110 group-hover:scale-100 ${activeLayer === 'a' ? 'opacity-100' : 'opacity-0'}`}
+	              />
+	              <img
+	                src={HERO_IMAGES[layerBIdx]}
+	                alt=""
+	                aria-hidden="true"
+	                decoding="async"
+	                loading="lazy"
+	                fetchPriority="auto"
+	                referrerPolicy="no-referrer"
+	                onError={(e) => {
+	                  if (e.currentTarget.src !== heroImage) e.currentTarget.src = heroImage;
+	                }}
+	                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out scale-110 group-hover:scale-100 ${activeLayer === 'b' ? 'opacity-100' : 'opacity-0'}`}
+	              />
+	              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
+	              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10 p-2 bg-black/10 backdrop-blur-md rounded-full">
+	                {HERO_IMAGES.map((_, idx) => (
+	                  <div
+	                    key={idx}
+	                    className={`h-2 rounded-full transition-all duration-500 cursor-pointer ${idx === currentIdx ? 'w-10 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+	                      }`}
+	                    onClick={() => void goToSlide(idx)}
+	                  />
+	                ))}
+	              </div>
+	            </div>
+	          </div>
         </section>
 
         {/* Features Slider / Grid */}
