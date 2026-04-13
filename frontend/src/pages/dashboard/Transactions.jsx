@@ -1,130 +1,246 @@
 import React, { useState } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { Plus, X, Loader2 } from 'lucide-react';
+import Footer from '../../components/Footer';
+
+
+const AnimatedDropdown = ({ label, value, setValue, options, color }) => {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.id === value);
+
+  return (
+    <div className="space-y-1 relative">
+      <label className={`text-[10px] font-black uppercase tracking-[0.2em] ${color}`}>
+        {label}
+      </label>
+
+      <div
+        onClick={() => setOpen(!open)}
+        className="w-full bg-bg border border-border rounded-xl md:rounded-2xl px-3 md:px-4 py-3 md:py-4 h-[44px] md:h-[52px] flex items-center cursor-pointer hover:border-primary transition-all"
+      >
+        <span className={`${selected ? "text-text" : "text-text-secondary"} truncate`}>
+          {selected ? selected.name : "Select account"}
+        </span>
+      </div>
+
+      <div
+        className={`absolute left-0 w-full mt-2 bg-surface border border-border rounded-2xl shadow-xl overflow-hidden z-50 transition-all duration-300 ${
+          open ? "max-h-60 opacity-100 scale-100" : "max-h-0 opacity-0 scale-95 pointer-events-none"
+        }`}
+      >
+        <div className="overflow-y-auto max-h-60">
+          {options.map(a => (
+            <div
+              key={a.id}
+              onClick={() => {
+                setValue(a.id);
+                setOpen(false);
+              }}
+              className="px-4 py-3 cursor-pointer hover:bg-bg transition font-semibold text-text"
+            >
+              {a.name}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Transactions = () => {
   const { activeBusiness, accounts, transactions, addTransaction } = useApp();
-  const [showForm, setShowForm] = useState(false);
+
+  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const [date, setDate] = useState('');
   const [desc, setDesc] = useState('');
   const [debitAcc, setDebitAcc] = useState('');
   const [creditAcc, setCreditAcc] = useState('');
   const [amount, setAmount] = useState('');
 
-  if (!activeBusiness) {
-    return <div className="text-center mt-20 text-grayText font-light">Please select an active business.</div>;
-  }
+  if (!activeBusiness) return null;
 
   const handlePost = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if(date && desc && debitAcc && creditAcc && amount > 0) {
+
+    if (date && desc && debitAcc && creditAcc && parseFloat(amount) > 0) {
       const { success } = await addTransaction({
         date,
         description: desc,
         debits: [{ accountId: debitAcc, amount: parseFloat(amount) }],
         credits: [{ accountId: creditAcc, amount: parseFloat(amount) }]
       });
-      if(success) {
-        setShowForm(false);
-        setDate(''); setDesc(''); setDebitAcc(''); setCreditAcc(''); setAmount('');
+
+      if (success) {
+        setShowModal(false);
+        setDate('');
+        setDesc('');
+        setDebitAcc('');
+        setCreditAcc('');
+        setAmount('');
       }
     }
+
     setLoading(false);
   };
 
   const getAccountName = (id) => accounts.find(a => a.id === id)?.name || id;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center border-b-[1.75px] border-borderDark pb-4">
-        <div>
-          <h1 className="text-3xl font-medium tracking-heading text-white">Journal Entries</h1>
-          <p className="text-grayText font-light mt-1 text-sm">Double-entry transaction ledger.</p>
-        </div>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm">
-          {showForm ? 'Cancel Entry' : '+ New Journal Entry'}
+    <div className="max-w-screen-2xl mx-auto space-y-10 pb-20 px-4 md:px-6">
+
+
+      <div className="flex justify-between items-end border-b border-border pb-6">
+        <h1 className="text-4xl font-extrabold text-text">Journal Entries</h1>
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="btn-primary flex items-center gap-3 px-6 py-3 font-black shadow-xl"
+        >
+          <Plus size={18} /> NEW ENTRY
         </button>
       </div>
 
-      {showForm && (
-        <div className="panel p-6 sm:p-8 anim-fade-up">
-          <h2 className="text-xl font-medium tracking-heading mb-6 border-b-[1.75px] border-borderDark pb-2 inline-block">Post Transaction</h2>
-          <form onSubmit={handlePost} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                  <label className="block text-sm font-medium tracking-heading mb-1.5 text-lightWhite">Date</label>
-                  <input type="date" value={date} onChange={e=>setDate(e.target.value)} required className="w-full bg-black border-[1.75px] border-borderDark p-3 text-white focus:outline-none focus:border-accent font-light" />
-               </div>
-               <div>
-                  <label className="block text-sm font-medium tracking-heading mb-1.5 text-lightWhite">Description</label>
-                  <input type="text" value={desc} onChange={e=>setDesc(e.target.value)} required placeholder="e.g. Paid Office Rent" className="w-full bg-black border-[1.75px] border-borderDark p-3 text-white focus:outline-none focus:border-accent font-light" />
-               </div>
+
+      <div className="bg-surface border border-border rounded-[2rem] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-bg text-[10px] uppercase font-black text-text-secondary">
+              <tr>
+                <th className="p-4">Date</th>
+                <th className="p-4">Details</th>
+                <th className="p-4 text-right">Debit</th>
+                <th className="p-4 text-right">Credit</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {transactions.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-10 text-text-secondary">
+                    No transactions yet
+                  </td>
+                </tr>
+              ) : transactions.map(t => (
+                <React.Fragment key={t.id}>
+                  <tr className="border-b border-border">
+                    <td className="p-4">{t.date}</td>
+                    <td colSpan="3" className="p-4 font-medium">{t.description}</td>
+                  </tr>
+
+                  <tr className="border-b border-border hover:bg-bg/50">
+                    <td></td>
+                    <td className="p-4">
+                      {t.debits.map(d => (
+                        <div key={d.accountId} className="text-green-500">
+                          Dr. {getAccountName(d.accountId)}
+                        </div>
+                      ))}
+                      {t.credits.map(c => (
+                        <div key={c.accountId} className="text-red-500">
+                          Cr. {getAccountName(c.accountId)}
+                        </div>
+                      ))}
+                    </td>
+
+                    <td className="p-4 text-right">
+                      {t.debits.map((d, i) => <div key={i}>{d.amount}</div>)}
+                    </td>
+
+                    <td className="p-4 text-right">
+                      {t.credits.map((c, i) => <div key={i}>{c.amount}</div>)}
+                    </td>
+                  </tr>
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      {showModal && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-6 z-[9999]"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowModal(false);
+          }}
+        >
+          <div className="bg-surface border border-border p-10 w-full max-w-xl rounded-[3rem] shadow-2xl relative">
+
+
+            <button 
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="absolute top-8 right-8 p-3 bg-bg border border-border rounded-2xl"
+            >
+              <X size={20} />
+            </button>
+
+
+            <div className="flex items-center gap-5 mb-10">
+              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                <Plus size={28} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-text uppercase">
+                  Post Transaction
+                </h2>
+                <p className="text-xs text-text-secondary font-bold uppercase tracking-widest">
+                  Record double-entry journal
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-               <div>
-                  <label className="block text-sm font-medium tracking-heading mb-1.5 text-success">Debit Account</label>
-                  <select value={debitAcc} onChange={e=>setDebitAcc(e.target.value)} required className="w-full bg-black border-[1.75px] border-success p-3 text-white focus:outline-none font-light appearance-none">
-                     <option value="" disabled>Select Account...</option>
-                     {accounts.map(a => <option key={a.id} value={a.id}>{a.id} - {a.name}</option>)}
-                  </select>
-               </div>
-               <div>
-                  <label className="block text-sm font-medium tracking-heading mb-1.5 text-error">Credit Account</label>
-                  <select value={creditAcc} onChange={e=>setCreditAcc(e.target.value)} required className="w-full bg-black border-[1.75px] border-error p-3 text-white focus:outline-none font-light appearance-none">
-                     <option value="" disabled>Select Account...</option>
-                     {accounts.map(a => <option key={a.id} value={a.id}>{a.id} - {a.name}</option>)}
-                  </select>
-               </div>
-               <div>
-                  <label className="block text-sm font-medium tracking-heading mb-1.5 text-lightWhite">Amount</label>
-                  <input type="number" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="0.00" className="w-full bg-black border-[1.75px] border-borderDark p-3 text-white focus:outline-none focus:border-accent font-light font-mono" />
-               </div>
-            </div>
-            
-            <button type="submit" className="btn-primary w-full">Post Entry</button>
-          </form>
+
+            <form onSubmit={handlePost} className="space-y-8">
+
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                    Date
+                  </label>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-bg border border-border rounded-2xl p-4" required />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                    Amount
+                  </label>
+                  <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-bg border border-border rounded-2xl p-4" required />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                  Description
+                </label>
+                <input type="text" value={desc} onChange={e => setDesc(e.target.value)} className="w-full bg-bg border border-border rounded-2xl p-4" required />
+              </div>
+
+              <div className="grid grid-cols-2 gap-8">
+                <AnimatedDropdown label="Debit Account" value={debitAcc} setValue={setDebitAcc} options={accounts} color="text-emerald-500" />
+                <AnimatedDropdown label="Credit Account" value={creditAcc} setValue={setCreditAcc} options={accounts} color="text-rose-500" />
+              </div>
+
+              <div className="flex gap-4 pt-6">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-black">
+                  Cancel
+                </button>
+
+                <button type="submit" disabled={loading} className="btn-primary flex-1 py-4 text-xs font-black">
+                  {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Post Entry'}
+                </button>
+              </div>
+
+            </form>
+          </div>
         </div>
       )}
 
-      <div className="panel overflow-x-auto anim-fade-up">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-naviBlue text-xs uppercase tracking-heading text-grayText border-b-[1.75px] border-borderDark">
-              <th className="p-4 font-medium w-32 border-r-[1.75px] border-borderDark">Date</th>
-              <th className="p-4 font-medium border-r-[1.75px] border-borderDark">Description / Accounts</th>
-              <th className="p-4 font-medium text-right w-40 border-r-[1.75px] border-borderDark">Debit</th>
-              <th className="p-4 font-medium text-right w-40">Credit</th>
-            </tr>
-          </thead>
-          <tbody>
-             {transactions.length === 0 ? (
-               <tr><td colSpan="4" className="p-8 text-center text-grayText font-light">No transactions recorded yet.</td></tr>
-             ) : transactions.map(t => (
-               <React.Fragment key={t.id}>
-                 <tr className="bg-black/80 border-b-[1.75px] border-borderDark">
-                    <td className="p-4 text-lightWhite font-mono text-sm border-r-[1.75px] border-borderDark align-top" rowSpan={2}>{t.date}</td>
-                    <td className="p-4 text-white font-medium border-r-[1.75px] border-borderDark" colSpan={3}>{t.description}</td>
-                 </tr>
-                 <tr className="border-b-[1.75px] border-borderDark bg-black hover:bg-naviBlue/50 transition-colors">
-                    <td className="p-4 border-r-[1.75px] border-borderDark">
-                       {t.debits.map(d => <div key={d.accountId} className="text-success text-sm font-light">Dr. {getAccountName(d.accountId)}</div>)}
-                       {t.credits.map(c => <div key={c.accountId} className="text-error text-sm pl-4 mt-1 font-light">Cr. {getAccountName(c.accountId)}</div>)}
-                    </td>
-                    <td className="p-4 text-right text-lightWhite font-mono text-sm border-r-[1.75px] border-borderDark align-top">
-                       {t.debits.map((d,i) => <div key={i}>{d.amount.toFixed(2)}</div>)}
-                    </td>
-                    <td className="p-4 text-right text-lightWhite font-mono text-sm align-bottom">
-                       {t.credits.map((c,i) => <div key={i}>{c.amount.toFixed(2)}</div>)}
-                    </td>
-                 </tr>
-               </React.Fragment>
-             ))}
-          </tbody>
-        </table>
-      </div>
+      <Footer />
     </div>
   );
 };
