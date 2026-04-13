@@ -48,7 +48,7 @@ const AnimatedDropdown = ({ label, value, setValue, options, color }) => {
 };
 
 const Transactions = () => {
-  const { activeBusiness, accounts, transactions, addTransaction } = useApp();
+  const { activeBusiness, accounts, transactions, addTransaction, userRole } = useApp();
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -95,12 +95,14 @@ const Transactions = () => {
       <div className="flex justify-between items-end border-b border-border pb-6">
         <h1 className="text-4xl font-extrabold text-text">Journal Entries</h1>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary flex items-center gap-3 px-6 py-3 font-black shadow-xl"
-        >
-          <Plus size={18} /> NEW ENTRY
-        </button>
+        {userRole !== 'Viewer' && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary flex items-center gap-3 px-6 py-3 font-black shadow-xl"
+          >
+            <Plus size={18} /> NEW ENTRY
+          </button>
+        )}
       </div>
 
 

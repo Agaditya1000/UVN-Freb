@@ -81,6 +81,40 @@ const CashFlowReport = () => {
     setShowExportOptions(false);
   };
 
+  const handleExportExcel = () => {
+    if (!data) return;
+
+    const workbook = XLSX.utils.book_new();
+    const rows = [
+      ['STATEMENT OF CASH FLOWS'],
+      [activeBusiness.name.toUpperCase()],
+      [`Period: ${from} to ${to}`],
+      [''],
+      ['Description', `Amount (${activeBusiness.currency})`],
+      ['CASH FLOW FROM OPERATING ACTIVITIES', ''],
+      ['Net Income', data.netIncome],
+      ...data.operatingActivities.map(a => [a.name, a.amount]),
+      ['Net Cash from Operating Activities', data.netOperatingCash],
+      [''],
+      ['CASH FLOW FROM INVESTING ACTIVITIES', ''],
+      ...data.investingActivities.map(a => [a.name, a.amount]),
+      ['Net Cash from Investing Activities', data.netInvestingCash],
+      [''],
+      ['CASH FLOW FROM FINANCING ACTIVITIES', ''],
+      ...data.financingActivities.map(a => [a.name, a.amount]),
+      ['Net Cash from Financing Activities', data.netFinancingCash],
+      [''],
+      ['NET INCREASE/DECREASE IN CASH', data.netChangeInCash],
+      ['Cash at Beginning of Period', data.beginningCash],
+      ['CASH AT END OF PERIOD', data.endingCash]
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Cash Flow');
+    XLSX.writeFile(workbook, `${activeBusiness.name}_Cash_Flow.xlsx`);
+    setShowExportOptions(false);
+  };
+
   const SummaryCard = ({ title, icon: Icon, amount, activities, colorClass }) => (
     <div className="bg-surface border border-border p-6 rounded-3xl group hover:border-primary/50 transition-all duration-300 shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -171,9 +205,10 @@ const CashFlowReport = () => {
                     <FileText size={16} className="text-red-500" /> PDF Document
                   </button>
                   <button 
-                    className="w-full text-left flex items-center gap-3 px-4 py-3 text-text hover:bg-bg rounded-xl transition-all text-xs font-bold opacity-50 cursor-not-allowed"
+                    onClick={handleExportExcel}
+                    className="w-full text-left flex items-center gap-3 px-4 py-3 text-text hover:bg-bg rounded-xl transition-all text-xs font-bold"
                   >
-                    <TableIcon size={16} className="text-emerald-500" /> Excel (Soon)
+                    <TableIcon size={16} className="text-emerald-500" /> Excel Spreadsheet
                   </button>
                </div>
              )}

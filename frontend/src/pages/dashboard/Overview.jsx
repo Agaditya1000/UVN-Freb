@@ -5,7 +5,7 @@
     import Footer from '../../components/Footer';
 
     const Overview = () => {
-      const { activeBusiness, accounts = [] } = useApp();
+      const { activeBusiness, accounts = [], userRole } = useApp();
       const navigate = useNavigate();
 
       if (!activeBusiness) {
@@ -125,8 +125,10 @@
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
-                  { title: "Record Transaction", desc: "Add income or expense entry", icon: <DollarSign size={20} />, path: "transactions" },
-                  { title: "Add Account", desc: "Create a new ledger account", icon: <Landmark size={20} />, path: "accounts" },
+                  ...(userRole !== 'Viewer' ? [
+                    { title: "Record Transaction", desc: "Add income or expense entry", icon: <DollarSign size={20} />, path: "transactions" },
+                    { title: "Add Account", desc: "Create a new ledger account", icon: <Landmark size={20} />, path: "accounts" }
+                  ] : []),
                   { title: "Balance Sheet", desc: "Generate reports", icon: <TrendingUp size={20} />, path: "balance-sheet" }
                 ].map((item, i) => (
                   <div

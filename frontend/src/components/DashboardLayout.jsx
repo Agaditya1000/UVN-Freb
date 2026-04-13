@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2 } from 'lucide-react';
+import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -18,7 +18,7 @@ const DashboardLayout = () => {
 
   const { user } = useAuth();
   const { theme } = useTheme();
-  const { businesses, activeBusiness, setActiveBusinessId } = useApp();
+  const { businesses, activeBusiness, setActiveBusinessId, userRole } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -46,7 +46,7 @@ const DashboardLayout = () => {
     { name: 'Accounts', path: '/dashboard/accounts' },
     { name: 'Transactions', path: '/dashboard/transactions' },
     { name: 'Reporting', path: '/dashboard/reports' },
-    { name: 'Business', path: '/dashboard/business', icon: <Settings size={18} /> },
+    ...(userRole === 'Owner' ? [{ name: 'Business', path: '/dashboard/business', icon: <Settings size={18} /> }] : []),
   ];
 
   const isReportingActive =
@@ -75,62 +75,64 @@ const DashboardLayout = () => {
 
           <div className="h-8 w-[1px] bg-border mx-2 hidden md:block"></div>
 
-          {/* BUSINESS UNIT SELECTOR */}
-          <div className="hidden md:flex items-center gap-6 relative pl-6 border-l border-border" ref={entityRef}>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-1">Business Unit</span>
-              <button
-                onClick={() => setShowEntity(!showEntity)}
-                className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-surface border border-border text-sm font-bold text-text hover:border-primary hover:shadow-lg hover:shadow-primary/10 transition-all group relative overflow-hidden active:scale-95"
-              >
-                <div className="p-1.5 bg-bg rounded-lg text-primary border border-border group-hover:bg-primary/10 transition-colors">
-                  <Building2 size={16} />
-                </div>
-                <span className="max-w-[140px] truncate">{activeBusiness?.name || "Select Portfolio"}</span>
-                <ChevronDown size={14} className={`text-text-secondary transition-transform duration-300 ${showEntity ? 'rotate-180' : ''}`} />
-                
-                {/* Subtle highlight line */}
-                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-              </button>
-            </div>
-
-            {showEntity && (
-              <div className="absolute top-full left-6 mt-3 w-72 bg-surface border border-border rounded-[2rem] p-3 z-50 shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="px-4 py-2 mb-2">
-                  <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Available Business Units</p>
-                </div>
-                <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
-                  {businesses.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => handleEntityChange(b.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${
-                        activeBusiness?.id === b.id 
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                        : 'text-text hover:bg-bg hover:translate-x-1'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${activeBusiness?.id === b.id ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>
-                          {b.name[0].toUpperCase()}
-                        </div>
-                        <span className="truncate">{b.name}</span>
-                      </div>
-                      {activeBusiness?.id === b.id && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-3 pt-3 border-t border-border flex justify-center">
-                   <button 
-                     onClick={() => { setShowEntity(false); navigate('/dashboard/business'); }}
-                     className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
-                   >
-                     Manage Business Units
-                   </button>
-                </div>
+          {/* BUSINESS UNIT SELECTOR - ONLY FOR OWNERS */}
+          {userRole === 'Owner' && (
+            <div className="hidden md:flex items-center gap-6 relative pl-6 border-l border-border" ref={entityRef}>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-1">Business Unit</span>
+                <button
+                  onClick={() => setShowEntity(!showEntity)}
+                  className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-surface border border-border text-sm font-bold text-text hover:border-primary hover:shadow-lg hover:shadow-primary/10 transition-all group relative overflow-hidden active:scale-95"
+                >
+                  <div className="p-1.5 bg-bg rounded-lg text-primary border border-border group-hover:bg-primary/10 transition-colors">
+                    <Building2 size={16} />
+                  </div>
+                  <span className="max-w-[140px] truncate">{activeBusiness?.name || "Select Portfolio"}</span>
+                  <ChevronDown size={14} className={`text-text-secondary transition-transform duration-300 ${showEntity ? 'rotate-180' : ''}`} />
+                  
+                  {/* Subtle highlight line */}
+                  <div className="absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+                </button>
               </div>
-            )}
-          </div>
+
+              {showEntity && (
+                <div className="absolute top-full left-6 mt-3 w-72 bg-surface border border-border rounded-[2rem] p-3 z-50 shadow-2xl animate-in zoom-in-95 duration-200">
+                  <div className="px-4 py-2 mb-2">
+                    <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Available Business Units</p>
+                  </div>
+                  <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
+                    {businesses.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => handleEntityChange(b.id)}
+                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${
+                          activeBusiness?.id === b.id 
+                          ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                          : 'text-text hover:bg-bg hover:translate-x-1'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${activeBusiness?.id === b.id ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>
+                            {b.name[0].toUpperCase()}
+                          </div>
+                          <span className="truncate">{b.name}</span>
+                        </div>
+                        {activeBusiness?.id === b.id && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-border flex justify-center">
+                    <button 
+                      onClick={() => { setShowEntity(false); navigate('/dashboard/business'); }}
+                      className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                    >
+                      Manage Business Units
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* CENTER NAV (DESKTOP) */}
@@ -183,6 +185,16 @@ const DashboardLayout = () => {
                 <p className="text-xs font-bold text-text truncate">{user?.email}</p>
                 <p className="text-[10px] text-text-secondary font-medium">Session ID: {user?.id?.slice(0,8)}</p>
               </div>
+              
+              {userRole === 'Owner' && (
+                <button 
+                  onClick={() => { setShowMenu(false); navigate('/dashboard/assigned'); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors"
+                >
+                  <Users size={16} /> Assigned Users
+                </button>
+              )}
+
               <button 
                 onClick={() => { setShowMenu(false); navigate('/dashboard/profile'); }}
                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors"
@@ -208,19 +220,23 @@ const DashboardLayout = () => {
           </button>
           
           <div className="space-y-6">
-            <p className="text-xs font-bold text-text-secondary uppercase tracking-widest border-b border-border pb-2">Business Units</p>
-            <div className="space-y-2">
-              {businesses.map(b => (
-                <button
-                  key={b.id}
-                  onClick={() => { handleEntityChange(b.id); setOpen(false); }}
-                  className={`w-full text-left px-5 py-3 rounded-2xl font-bold transition-all
-                    ${activeBusiness?.id === b.id ? 'bg-primary text-white shadow-lg' : 'bg-bg text-text'}`}
-                >
-                  {b.name}
-                </button>
-              ))}
-            </div>
+            {userRole === 'Owner' && (
+              <>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-widest border-b border-border pb-2">Business Units</p>
+                <div className="space-y-2">
+                  {businesses.map(b => (
+                    <button
+                      key={b.id}
+                      onClick={() => { handleEntityChange(b.id); setOpen(false); }}
+                      className={`w-full text-left px-5 py-3 rounded-2xl font-bold transition-all
+                        ${activeBusiness?.id === b.id ? 'bg-primary text-white shadow-lg' : 'bg-bg text-text'}`}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
             <p className="text-xs font-bold text-text-secondary uppercase tracking-widest border-b border-border pb-2 mt-8">Navigation</p>
             <div className="grid grid-cols-1 gap-3">
