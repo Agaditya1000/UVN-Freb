@@ -3,7 +3,7 @@ import { useApp } from '../../contexts/AppContext';
 import { Plus, X, Loader2 } from 'lucide-react';
 import Footer from '../../components/Footer';
 
-/* ✅ Animated Dropdown */
+
 const AnimatedDropdown = ({ label, value, setValue, options, color }) => {
   const [open, setOpen] = useState(false);
   const selected = options.find(o => o.id === value);
@@ -91,7 +91,7 @@ const Transactions = () => {
   return (
     <div className="max-w-screen-2xl mx-auto space-y-10 pb-20 px-4 md:px-6">
 
-      {/* HEADER */}
+
       <div className="flex justify-between items-end border-b border-border pb-6">
         <h1 className="text-4xl font-extrabold text-text">Journal Entries</h1>
 
@@ -103,7 +103,7 @@ const Transactions = () => {
         </button>
       </div>
 
-      {/* TABLE */}
+
       <div className="bg-surface border border-border rounded-[2rem] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -160,7 +160,7 @@ const Transactions = () => {
         </div>
       </div>
 
-      {/* MODAL */}
+
       {showModal && (
         <div 
           className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-6 z-[9999]"
@@ -170,7 +170,7 @@ const Transactions = () => {
         >
           <div className="bg-surface border border-border p-10 w-full max-w-xl rounded-[3rem] shadow-2xl relative">
 
-            {/* CLOSE */}
+
             <button 
               type="button"
               onClick={() => setShowModal(false)}
@@ -179,7 +179,7 @@ const Transactions = () => {
               <X size={20} />
             </button>
 
-            {/* HEADER */}
+
             <div className="flex items-center gap-5 mb-10">
               <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
                 <Plus size={28} />
@@ -194,7 +194,7 @@ const Transactions = () => {
               </div>
             </div>
 
-            {/* FORM */}
+
             <form onSubmit={handlePost} className="space-y-8">
 
               <div className="grid grid-cols-2 gap-8">
