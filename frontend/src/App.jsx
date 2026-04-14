@@ -22,6 +22,7 @@ import ReportsLayout from './pages/dashboard/reports/ReportsLayout';
 import ReportsHub from './pages/dashboard/reports/ReportsHub';
 import TrialBalanceReport from './pages/dashboard/reports/TrialBalanceReport';
 import ProfitLossReport from './pages/dashboard/reports/ProfitLossReport';
+import TradingAccountReport from './pages/dashboard/reports/TradingAccountReport';
 import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
 import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
 import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
@@ -56,6 +57,7 @@ function App() {
               <Route path="reports" element={<ReportsLayout />}>
                 <Route index element={<ReportsHub />} />
                 <Route path="trial-balance" element={<TrialBalanceReport />} />
+                <Route path="trading-account" element={<TradingAccountReport />} />
                 <Route path="profit-loss" element={<ProfitLossReport />} />
                 <Route path="general-ledger" element={<GeneralLedgerReport />} />
                 <Route path="balance-sheet" element={<ReportBalanceSheetShell />} />
