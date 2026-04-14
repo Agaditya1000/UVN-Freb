@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AppProvider } from './contexts/AppContext';
+import GlobalErrorBoundary from './components/GlobalErrorBoundary';
 
 import DashboardLayout from './components/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
@@ -25,9 +26,11 @@ import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
 import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
 import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
 import AssignedUsers from './pages/dashboard/AssignedUsers';
+import AuditLogView from './pages/dashboard/AuditLogView';
 
 function App() {
   return (
+    <GlobalErrorBoundary>
     <ThemeProvider>
     <AuthProvider>
     <AppProvider>
@@ -59,6 +62,7 @@ function App() {
                 <Route path="cash-flow" element={<CashFlowReport />} />
               </Route>
               <Route path="assigned" element={<AssignedUsers />} />
+              <Route path="audit-log" element={<AuditLogView />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             
@@ -77,6 +81,7 @@ function App() {
     </AppProvider>
     </AuthProvider>
     </ThemeProvider>
+    </GlobalErrorBoundary>
   );
 }
 

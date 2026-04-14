@@ -41,7 +41,7 @@ const BusinessSetup = () => {
       setTaxId('');
       setFinYear('Jan-Dec');
     } else {
-      setMsg("Error provisioning entity. Ensure you have the right permissions.");
+      setMsg(result?.error?.message || "Error provisioning entity. Ensure you have the right permissions.");
     }
   };
 

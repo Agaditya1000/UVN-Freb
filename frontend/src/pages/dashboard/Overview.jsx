@@ -10,12 +10,29 @@
 
       if (!activeBusiness) {
         return (
-          <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text text-center">
-            <Building2 size={64} className="text-text-secondary mb-4" />
-            <h2 className="text-2xl font-bold mb-2">No Active Business</h2>
-            <p className="text-text-secondary">
-              Please select or create a business profile from the navigation menu.
+          <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text text-center p-6">
+            <div className="w-24 h-24 bg-surface border border-border rounded-[2rem] flex items-center justify-center text-text-secondary mb-6 shadow-inner">
+              <Building2 size={48} />
+            </div>
+            <h2 className="text-3xl font-black mb-3 uppercase tracking-tight">No Active Business</h2>
+            <p className="text-text-secondary max-w-sm mx-auto font-medium mb-10 leading-relaxed">
+              To start managing your finances, please select an existing business or establish a new profile.
             </p>
+            
+            {userRole === 'Owner' && (
+              <button 
+                onClick={() => navigate('/dashboard/business')}
+                className="btn-primary flex items-center gap-3 px-8 py-4 font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest text-xs"
+              >
+                <Building2 size={18} /> Setup First Business
+              </button>
+            )}
+            
+            {!userRole && (
+               <p className="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-6 opacity-50">
+                  Waiting for role authorization...
+               </p>
+            )}
           </div>
         );
       }
