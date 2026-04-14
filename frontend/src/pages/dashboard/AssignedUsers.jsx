@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Users, 
@@ -11,18 +12,50 @@ import {
   UserCircle,
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Link as LinkIcon,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 const AssignedUsers = () => {
   const { user } = useAuth();
-  const { activeBusiness, userRole, team, assignUser, revokeUser, loading } = useApp();
+  const { activeBusiness, userRole, team, assignUser, revokeUser, createInviteLink, loading } = useApp();
   
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('Viewer');
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState('');
+  const [detectedUser, setDetectedUser] = useState(null);
+
+  // Smart Role Lookup
+  useEffect(() => {
+    const lookupUser = async () => {
+      if (!email || !email.includes('@')) {
+        setDetectedUser(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('role, full_name')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        setDetectedUser(data);
+        // Auto-select their registered role
+        setRole(data.role);
+      } else {
+        setDetectedUser(null);
+      }
+    };
+
+    const timeoutId = setTimeout(lookupUser, 500);
+    return () => clearTimeout(timeoutId);
+  }, [email]);
 
   // Security: Only owners can access this page
   if (!loading && userRole !== 'Owner') {
@@ -58,6 +91,15 @@ const AssignedUsers = () => {
       if (!result.success) {
         alert("Failed to revoke access.");
       }
+    }
+  };
+
+  const handleGenerateLink = async () => {
+    const result = await createInviteLink(role);
+    if (result.success) {
+      setGeneratedLink(result.link);
+      navigator.clipboard.writeText(result.link);
+      setStatus({ type: 'success', msg: `Link copied! Send it to your ${role}.` });
     }
   };
 
@@ -128,6 +170,14 @@ const AssignedUsers = () => {
                       </button>
                     ))}
                   </div>
+                  {detectedUser && (
+                    <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest">
+                        Matched registered {detectedUser.role}: {detectedUser.full_name}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {status.msg && (
@@ -161,6 +211,30 @@ const AssignedUsers = () => {
                   <span className="text-text font-bold">Accountants</span> can record transactions and edit accounts. <span className="text-text font-bold">Viewers</span> are read-only.
                 </p>
              </div>
+          </div>
+
+          <div className="bg-surface border border-primary/20 p-8 rounded-[2.5rem] shadow-lg space-y-4">
+             <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                  <LinkIcon size={18} />
+                </div>
+                <h3 className="text-lg font-bold text-text">Invite via Link</h3>
+             </div>
+             <p className="text-[11px] text-text-secondary font-medium">
+               Send a link manually if the user isn't registered on the platform yet.
+             </p>
+             <button
+               onClick={handleGenerateLink}
+               className="w-full py-3 bg-bg border border-primary/30 text-primary hover:bg-primary/[0.03] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3"
+             >
+               <Copy size={16} />
+               Generate & Copy Link
+             </button>
+             {generatedLink && (
+               <div className="p-3 bg-bg/50 border border-border rounded-xl text-[10px] text-text-secondary font-mono truncate">
+                 {generatedLink}
+               </div>
+             )}
           </div>
         </div>
 
@@ -196,6 +270,11 @@ const AssignedUsers = () => {
                           <p className="text-sm font-bold text-text">{member.users?.email}</p>
                           {member.user_id === user.id && (
                             <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">You</span>
+                          )}
+                          {member.users?.role && member.role !== member.users.role && (
+                             <span className="text-[8px] font-black text-text-secondary/50 uppercase italic tracking-tighter">
+                               Registered as {member.users.role}
+                             </span>
                           )}
                         </div>
                         <p className="text-[10px] font-medium text-text-secondary mt-0.5 capitalize">{member.role}</p>
