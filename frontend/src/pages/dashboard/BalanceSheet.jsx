@@ -133,6 +133,161 @@ const BalanceSheet = () => {
     </div>
   );
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF('l', 'mm', 'a4'); 
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(40);
+    doc.text(activeBusiness.name.toUpperCase(), pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text("BALANCE SHEET", pageWidth / 2, 30, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(100);
+    doc.text(`As of ${statementDateLabel}`, pageWidth / 2, 38, { align: 'center' });
+
+    const fmt = (val) => {
+      const safeSymbol = symbol === '₹' ? 'Rs.' : symbol;
+      return `${safeSymbol} ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    };
+
+    // --- PREPARE COMBINED DATA ---
+    const assetRows = [];
+    assets.forEach(group => {
+      assetRows.push([{ content: group.title.toUpperCase(), styles: { fontStyle: 'bold', fillColor: [245, 245, 245], textColor: [100, 100, 100] } }, '']);
+      group.lines.forEach(l => assetRows.push([l.name, fmt(l.balance)]));
+      assetRows.push([{ content: `Total ${group.title}`, styles: { fontStyle: 'bold' } }, fmt(group.total)]);
+    });
+    assetRows.push([{ content: 'TOTAL ASSETS', styles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' } }, { content: fmt(totalAssetsVal), styles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' } }]);
+
+    const liabRows = [];
+    liabilities.forEach(group => {
+      liabRows.push([{ content: group.title.toUpperCase(), styles: { fontStyle: 'bold', fillColor: [245, 245, 245], textColor: [100, 100, 100] } }, '']);
+      group.lines.forEach(l => liabRows.push([l.name, fmt(l.balance)]));
+      liabRows.push([{ content: `Total ${group.title}`, styles: { fontStyle: 'bold' } }, fmt(group.total)]);
+    });
+    liabRows.push([{ content: 'CAPITAL & RESERVES', styles: { fontStyle: 'bold', fillColor: [245, 245, 245], textColor: [100, 100, 100] } }, '']);
+    liabRows.push(['Equity Share holder fund', fmt(equityShareFund)]);
+    liabRows.push(['Preference share holder fund', fmt(preferenceShareFund)]);
+    liabRows.push(['Reserve and surplus', fmt(reservesSurplus)]);
+    liabRows.push([netProfit >= 0 ? 'Add: Net Profit' : 'Less: Net Loss', fmt(netProfit)]);
+    liabRows.push(['Less: Drawings', `(${fmt(drawings)})`]);
+    liabRows.push([{ content: 'TOTAL LIABILITIES & EQUITY', styles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' } }, { content: fmt(totalLiabEquityVal), styles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' } }]);
+
+    // Merge into Combined Matrix (5 Columns)
+    const combinedRows = [];
+    const maxLen = Math.max(assetRows.length, liabRows.length);
+    
+    for (let i = 0; i < maxLen; i++) {
+      const a = assetRows[i] || ['', ''];
+      const l = liabRows[i] || ['', ''];
+      combinedRows.push([
+        a[0]?.content || a[0] || '', a[1]?.content || a[1] || '',
+        '',
+        l[0]?.content || l[0] || '', l[1]?.content || l[1] || ''
+      ]);
+    }
+
+    autoTable(doc, {
+      startY: 45,
+      head: [['ASSET HEAD', 'AMOUNT', '', 'LIABILITY & EQUITY HEAD', 'AMOUNT']],
+      body: combinedRows,
+      theme: 'plain',
+      styles: { fontSize: 8.5, cellPadding: 3 },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 35, halign: 'right' },
+        2: { cellWidth: 10 }, 
+        3: { cellWidth: 'auto' },
+        4: { cellWidth: 35, halign: 'right' }
+      },
+      headStyles: { fillColor: [40, 40, 40], textColor: 255, fontStyle: 'bold' },
+      didParseCell: (data) => {
+        const rowIndex = data.row.index;
+        const colIndex = data.column.index;
+        const rowData = combinedRows[rowIndex];
+
+        // Asset Side Styling
+        if (colIndex < 2) {
+          if (rowData[0] === 'TOTAL ASSETS') {
+            data.cell.styles.fillColor = [59, 130, 246];
+            data.cell.styles.textColor = 255;
+            data.cell.styles.fontStyle = 'bold';
+          } else if (rowData[0] && rowData[0] === rowData[0].toString().toUpperCase() && rowData[1] === '') {
+            data.cell.styles.fillColor = [245, 245, 245];
+            data.cell.styles.fontStyle = 'bold';
+          }
+        }
+        // Liability Side Styling
+        if (colIndex > 2) {
+          if (rowData[3] === 'TOTAL LIABILITIES & EQUITY') {
+            data.cell.styles.fillColor = [16, 185, 129];
+            data.cell.styles.textColor = 255;
+            data.cell.styles.fontStyle = 'bold';
+          } else if (rowData[3] && rowData[3] === rowData[3].toString().toUpperCase() && rowData[4] === '') {
+            data.cell.styles.fillColor = [245, 245, 245];
+            data.cell.styles.fontStyle = 'bold';
+          }
+        }
+      }
+    });
+
+    // Central 'Balanced' Badge (Floating middle)
+    const midX = pageWidth / 2;
+    doc.setDrawColor(220);
+    doc.setFillColor(255, 255, 255);
+    doc.circle(midX, 60, 6, 'FD');
+    doc.setFontSize(5);
+    doc.setTextColor(150);
+    doc.text("BALANCED", midX, 61, { align: 'center' });
+
+    doc.save(`Balance_Sheet_Synchronized_${activeBusiness.name}.pdf`);
+    setShowExportOptions(false);
+  };
+
+  const handleExportExcel = () => {
+    const data = [];
+    data.push([activeBusiness.name.toUpperCase()]);
+    data.push(['BALANCE SHEET']);
+    data.push([`As of ${statementDateLabel}`]);
+    data.push([]);
+
+    data.push(['ASSETS']);
+    assets.forEach(group => {
+      data.push([group.title]);
+      group.lines.forEach(l => data.push(['', l.name, l.balance]));
+      data.push(['', `Total ${group.title}`, group.total]);
+    });
+    data.push(['TOTAL ASSETS', '', totalAssetsVal]);
+    data.push([]);
+
+    data.push(['LIABILITIES & EQUITY']);
+    liabilities.forEach(group => {
+      data.push([group.title]);
+      group.lines.forEach(l => data.push(['', l.name, l.balance]));
+      data.push(['', `Total ${group.title}`, group.total]);
+    });
+    data.push(['Capital & Reserves']);
+    data.push(['', 'Equity Share holder fund', equityShareFund]);
+    data.push(['', 'Preference share holder fund', preferenceShareFund]);
+    data.push(['', 'Reserve and surplus', reservesSurplus]);
+    data.push(['', netProfit >= 0 ? 'Add: Net Profit' : 'Less: Net Loss', netProfit]);
+    data.push(['', 'Less: Drawings', -drawings]);
+    data.push(['TOTAL LIABILITIES & EQUITY', '', totalLiabEquityVal]);
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Balance Sheet");
+    XLSX.writeFile(wb, `Balance_Sheet_${activeBusiness.name}.xlsx`);
+    setShowExportOptions(false);
+  };
+
   return (
     <div className="max-w-screen-2xl mx-auto space-y-10 pb-20 animate-in fade-in duration-700">
       
@@ -150,10 +305,54 @@ const BalanceSheet = () => {
              <div className="flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-500" /><span>Verified context: {activeBusiness.name}</span></div>
           </div>
         </div>
-        <button className="btn-primary flex items-center gap-3 py-4 px-8 text-sm font-black shadow-xl shadow-primary/20">
-           <Download size={20} />
-           DOWNLOAD PDF
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowExportOptions(!showExportOptions)}
+            className="btn-primary flex items-center gap-3 py-4 px-8 text-sm font-black shadow-xl shadow-primary/20"
+          >
+            <Download size={20} />
+            EXPORT REPORT
+            <ChevronDown size={14} className={`transition-transform duration-300 ${showExportOptions ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showExportOptions && (
+            <>
+              {/* Overlay to close dropdown */}
+              <div className="fixed inset-0 z-40" onClick={() => setShowExportOptions(false)}></div>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 mt-4 w-64 bg-surface border border-border rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-2">
+                  <button 
+                    onClick={handleExportPDF}
+                    className="w-full flex items-center gap-4 p-4 hover:bg-primary/5 text-text-secondary hover:text-primary transition-all rounded-2xl group text-left"
+                  >
+                    <div className="p-2 bg-red-500/10 text-red-500 rounded-xl group-hover:scale-110 transition-transform">
+                      <FileText size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest">Download PDF</p>
+                      <p className="text-[10px] opacity-60 font-medium">Standard Audit Format</p>
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={handleExportExcel}
+                    className="w-full flex items-center gap-4 p-4 hover:bg-emerald-500/5 text-text-secondary hover:text-emerald-600 transition-all rounded-2xl group text-left"
+                  >
+                    <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl group-hover:scale-110 transition-transform">
+                      <TableIcon size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest">Download Excel</p>
+                      <p className="text-[10px] opacity-60 font-medium">Editable Spreadsheet</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[1px] bg-border border border-border rounded-[3rem] overflow-hidden shadow-2xl bg-surface relative">
