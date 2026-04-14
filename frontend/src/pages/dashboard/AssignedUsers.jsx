@@ -62,22 +62,56 @@ const AssignedUsers = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
+  if (!activeBusiness && !loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-20 h-20 bg-surface border border-border rounded-3xl flex items-center justify-center text-text-secondary opacity-20">
+          <Users size={40} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-text">Select Business Context</h2>
+          <p className="text-text-secondary text-sm max-w-xs mx-auto font-medium">
+            You must select a business unit from the top navigation menu before you can manage team access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleAssign = async (e) => {
     e.preventDefault();
     if (!email) return;
+
+    // 1. Check if already assigned locally first
+    const isAlreadyAssigned = team.some(m => m.users?.email?.toLowerCase() === email.toLowerCase());
+    if (isAlreadyAssigned) {
+      setStatus({ type: 'error', msg: 'This user is already a member of your team.' });
+      return;
+    }
 
     setIsSubmitting(true);
     setStatus({ type: '', msg: '' });
 
     const result = await assignUser(email, role);
+    setIsSubmitting(false);
 
     if (result.success) {
       setStatus({ type: 'success', msg: `Successfully assigned ${email} as ${role}` });
       setEmail('');
+      setDetectedUser(null);
     } else {
-      setStatus({ type: 'error', msg: typeof result.error === 'string' ? result.error : 'Failed to assign user. Make sure they have a registered account.' });
+      let errorMessage = result.error?.message || result.error || 'Failed to assign user.';
+      
+      // Friendly message for duplicate key constraint
+      if (errorMessage.includes('unique_constraint') || errorMessage.includes('duplicate key')) {
+        errorMessage = 'This user is already a member of your team.';
+      }
+
+      setStatus({ 
+        type: 'error', 
+        msg: errorMessage
+      });
     }
-    setIsSubmitting(false);
   };
 
   const handleRevoke = async (userId, userEmail) => {
