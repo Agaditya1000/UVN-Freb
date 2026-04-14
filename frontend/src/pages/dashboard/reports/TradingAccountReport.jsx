@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../../../contexts/AppContext';
 import { buildTradingAccount, defaultPeriodDates } from '../../../utils/reporting';
-import { Calculator, LayoutGrid, Info } from 'lucide-react';
+import { Calculator, LayoutGrid, Info, Loader2 } from 'lucide-react';
 
 const TradingAccountReport = () => {
   const { activeBusiness, accounts, transactions, loading } = useApp();
