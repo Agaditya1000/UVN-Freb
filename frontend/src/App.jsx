@@ -43,6 +43,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="/balance-sheet-preview" element={<BalanceSheet />} />
             
             <Route 
               path="/settings" 
