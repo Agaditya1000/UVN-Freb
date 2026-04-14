@@ -24,6 +24,7 @@ import ProfitLossReport from './pages/dashboard/reports/ProfitLossReport';
 import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
 import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
 import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
+import AssignedUsers from './pages/dashboard/AssignedUsers';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
                 <Route path="balance-sheet" element={<ReportBalanceSheetShell />} />
                 <Route path="cash-flow" element={<CashFlowReport />} />
               </Route>
+              <Route path="assigned" element={<AssignedUsers />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             

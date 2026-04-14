@@ -61,11 +61,11 @@ const enterprisePoints = [
 ];
 
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1554224155-8d04182405f2?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1507679799987-c7377f323b5d?auto=format&fit=crop&q=80&w=1600",
-  "https://images.unsplash.com/photo-1454165833444-18d72855024e?auto=format&fit=crop&q=80&w=1600"
+  "/images/hero/dashboard.png",
+  "/images/hero/business.png",
+  "/images/hero/growth.png",
+  "/images/hero/security.png",
+  "/images/hero/global.png"
 ];
 
 const Landing = () => {
@@ -385,14 +385,7 @@ const Landing = () => {
                 The unified system of record for the next generation of agile enterprises. Multi-standard, multi-tenant.
               </p>
             </div>
-            <div>
-              <h4 className="font-black text-[11px] mb-8 uppercase tracking-[0.3em] text-text border-l-4 border-primary pl-4">Platform</h4>
-              <ul className="space-y-4 text-sm font-bold text-text-secondary">
-                <li><Link to="#" className="hover:text-primary transition-colors">Infrastructure</Link></li>
-                <li><Link to="#" className="hover:text-primary transition-colors">API Reference</Link></li>
-                <li><Link to="#" className="hover:text-primary transition-colors">Status Board</Link></li>
-              </ul>
-            </div>
+            
             <div>
               <h4 className="font-black text-[11px] mb-8 uppercase tracking-[0.3em] text-text border-l-4 border-primary pl-4">Legal</h4>
               <ul className="space-y-4 text-sm font-bold text-text-secondary">
