@@ -8,21 +8,29 @@ CREATE TABLE IF NOT EXISTS public.users (
   full_name text,
   email text UNIQUE,
   avatar_url text,
+  role text DEFAULT 'Viewer',
   created_at timestamp with time zone DEFAULT now()
 );
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+-- 🛠️ DATABASE REPAIR: Ensure the mandatory 'role' column exists
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS role text DEFAULT 'Viewer';
+
+-- Update any existing users to have the default role
+UPDATE public.users SET role = 'Viewer' WHERE role IS NULL;
+
 -- 2. Trigger Function for Syncing
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.users (id, full_name, email, avatar_url)
+  INSERT INTO public.users (id, full_name, email, avatar_url, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
     NEW.email,
-    NEW.raw_user_meta_data->>'avatar_url'
+    NEW.raw_user_meta_data->>'avatar_url',
+    COALESCE(NEW.raw_user_meta_data->>'role', 'Viewer')
   );
   RETURN NEW;
 END;
