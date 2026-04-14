@@ -22,10 +22,10 @@ const CashFlowReport = () => {
         {/* Decorative background element */}
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-        
+
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="p-4 bg-bg border border-border border-l-4 border-l-primary rounded-2xl">
-           <Lock size={32} className="text-primary animate-pulse" />
+            <Lock size={32} className="text-primary animate-pulse" />
           </div>
           <div className="flex-1">
             <h3 className="text-xl font-bold text-text mb-2">Reconciliation Engine Pending</h3>
@@ -59,8 +59,8 @@ const CashFlowReport = () => {
             </div>
           </div>
           <div className="mt-8 pt-4 border-t border-border/50 flex justify-between items-center">
-             <span className="text-xs font-bold text-text">Net Operating Cash</span>
-             <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
+            <span className="text-xs font-bold text-text">Net Operating Cash</span>
+            <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
           </div>
         </div>
 
@@ -80,9 +80,9 @@ const CashFlowReport = () => {
               <div className="h-4 w-14 bg-border/50 rounded animate-pulse"></div>
             </div>
           </div>
-           <div className="mt-14 pt-4 border-t border-border/50 flex justify-between items-center">
-             <span className="text-xs font-bold text-text">Net Investing Cash</span>
-             <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
+          <div className="mt-14 pt-4 border-t border-border/50 flex justify-between items-center">
+            <span className="text-xs font-bold text-text">Net Investing Cash</span>
+            <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
           </div>
         </div>
 
@@ -103,8 +103,8 @@ const CashFlowReport = () => {
             </div>
           </div>
           <div className="mt-14 pt-4 border-t border-border/50 flex justify-between items-center">
-             <span className="text-xs font-bold text-text">Net Financing Cash</span>
-             <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
+            <span className="text-xs font-bold text-text">Net Financing Cash</span>
+            <div className="h-5 w-24 bg-primary/20 rounded animate-pulse"></div>
           </div>
         </div>
       </div>
