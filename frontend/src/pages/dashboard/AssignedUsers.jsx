@@ -46,8 +46,7 @@ const AssignedUsers = () => {
 
       if (!error && data) {
         setDetectedUser(data);
-        // Auto-select their registered role
-        setRole(data.role);
+        setRole(data.role); // Auto-suggest/Select the registered role
       } else {
         setDetectedUser(null);
       }
@@ -62,22 +61,56 @@ const AssignedUsers = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
+  if (!activeBusiness && !loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-20 h-20 bg-surface border border-border rounded-3xl flex items-center justify-center text-text-secondary opacity-20">
+          <Users size={40} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-text">Select Business Context</h2>
+          <p className="text-text-secondary text-sm max-w-xs mx-auto font-medium">
+            You must select a business unit from the top navigation menu before you can manage team access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleAssign = async (e) => {
     e.preventDefault();
     if (!email) return;
+
+    // 1. Check if already assigned locally first
+    const isAlreadyAssigned = team.some(m => m.users?.email?.toLowerCase() === email.toLowerCase());
+    if (isAlreadyAssigned) {
+      setStatus({ type: 'error', msg: 'This user is already a member of your team.' });
+      return;
+    }
 
     setIsSubmitting(true);
     setStatus({ type: '', msg: '' });
 
     const result = await assignUser(email, role);
+    setIsSubmitting(false);
 
     if (result.success) {
       setStatus({ type: 'success', msg: `Successfully assigned ${email} as ${role}` });
       setEmail('');
+      setDetectedUser(null);
     } else {
-      setStatus({ type: 'error', msg: typeof result.error === 'string' ? result.error : 'Failed to assign user. Make sure they have a registered account.' });
+      let errorMessage = result.error?.message || result.error || 'Failed to assign user.';
+      
+      // Friendly message for duplicate key constraint
+      if (errorMessage.includes('unique_constraint') || errorMessage.includes('duplicate key')) {
+        errorMessage = 'This user is already a member of your team.';
+      }
+
+      setStatus({ 
+        type: 'error', 
+        msg: errorMessage
+      });
     }
-    setIsSubmitting(false);
   };
 
   const handleRevoke = async (userId, userEmail) => {
@@ -180,6 +213,15 @@ const AssignedUsers = () => {
                   )}
                 </div>
 
+                {detectedUser && role !== detectedUser.role && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-2">
+                     <AlertCircle size={14} className="text-red-500" />
+                     <span className="text-[10px] font-bold text-red-600">
+                       Error: This user is already an {detectedUser.role}.
+                     </span>
+                  </div>
+                )}
+
                 {status.msg && (
                   <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-3 ${
                     status.type === 'success' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
@@ -191,8 +233,8 @@ const AssignedUsers = () => {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100"
+                  disabled={isSubmitting || (detectedUser && role !== detectedUser.role)}
+                  className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale disabled:active:scale-100"
                 >
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={18} />}
                   Assign Access
@@ -270,11 +312,6 @@ const AssignedUsers = () => {
                           <p className="text-sm font-bold text-text">{member.users?.email}</p>
                           {member.user_id === user.id && (
                             <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">You</span>
-                          )}
-                          {member.users?.role && member.role !== member.users.role && (
-                             <span className="text-[8px] font-black text-text-secondary/50 uppercase italic tracking-tighter">
-                               Registered as {member.users.role}
-                             </span>
                           )}
                         </div>
                         <p className="text-[10px] font-medium text-text-secondary mt-0.5 capitalize">{member.role}</p>

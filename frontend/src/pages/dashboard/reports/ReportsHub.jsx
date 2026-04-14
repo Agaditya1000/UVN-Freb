@@ -15,6 +15,12 @@ const ReportsHub = () => {
       icon: Scale,
     },
     {
+      title: 'Trading Account',
+      desc: 'Summary of direct revenue and cost of goods sold. Calculates Gross Profit before indirect expenses.',
+      to: `/dashboard/reports/trading-account?from=${from}&to=${to}`,
+      icon: TrendingUp,
+    },
+    {
       title: 'Profit & loss',
       desc: 'Income statement: revenue and expenses for a period, with net income.',
       to: `/dashboard/reports/profit-loss?from=${from}&to=${to}`,

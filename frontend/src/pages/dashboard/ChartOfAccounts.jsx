@@ -20,7 +20,8 @@ const ChartOfAccounts = () => {
   const [newAccntCode, setNewAccntCode] = useState('');
   const [newAccntName, setNewAccntName] = useState('');
   const [newAccntCat, setNewAccntCat] = useState('Asset');
-  const [newAccntSubCat, setNewAccntSubCat] = useState('Current Asset');
+  const [newAccntGroup, setNewAccntGroup] = useState('Current Assets');
+  const [newAccntSubCat, setNewAccntSubCat] = useState('Cash at Bank');
   const [formMsg, setFormMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -39,11 +40,17 @@ const ChartOfAccounts = () => {
   };
 
   const openEditModal = (acc) => {
+    // Determine the group by searching subCatMap
+    let groupMatch = Object.keys(subCatMap[acc.category] || {}).find(g => 
+      subCatMap[acc.category][g].includes(acc.sub_category)
+    ) || Object.keys(subCatMap[acc.category] || {})[0];
+
     setModalMode('edit');
     setSelectedAccount(acc);
     setNewAccntCode(acc.id);
     setNewAccntName(acc.name);
     setNewAccntCat(acc.category);
+    setNewAccntGroup(groupMatch);
     setNewAccntSubCat(acc.sub_category);
     setShowModal(true);
   };
@@ -119,11 +126,26 @@ const ChartOfAccounts = () => {
   }
 
   const subCatMap = {
-    'Asset': ['Current Asset', 'Fixed Asset', 'Other Asset'],
-    'Liability': ['Current Liability', 'Long-Term Liability'],
-    'Equity': ['Capital & Reserves'],
-    'Revenue': ['Operating Revenue', 'Other Revenue'],
-    'Expense': ['Operating Expense', 'Finance Cost', 'Tax']
+    'Asset': {
+      'Current Assets': ['Cash at Hand', 'Cash at Bank', 'Accounts Receivable', 'Reserve for Bad Debt', 'Stock/Inventory', 'Prepaid Expenses', 'Notes Receivable'],
+      'Fixed Assets': ['Plant & Machinery', 'Land & Buildings', 'Furniture & Fixtures', 'Other Fixed Assets'],
+      'Other Assets': ['Other Assets']
+    },
+    'Liability': {
+      'Current Liabilities': ['Accounts Payable', 'Sales Taxes Payable', 'Payroll Taxes Payable', 'Income Taxes Payable', 'Accrued Wages Payable', 'Unearned Revenues', 'Bank Overdraft', 'Short-Term Loan Payable'],
+      'Long-Term Liabilities': ['Long-term Bank Loans', 'Mortgage Payable', 'Debentures']
+    },
+    'Equity': {
+      'Capital & Reserves': ['Equity Share holder fund', 'Preference share holder fund', 'Reserve and surplus', 'Drawings', 'Retained Earnings']
+    },
+    'Revenue': {
+      'Direct Income': ['Direct Revenue', 'Service Income'],
+      'Indirect Income': ['Interest Received', 'Discount Received', 'Commission Received', 'Other Revenue']
+    },
+    'Expense': {
+      'Direct Expenses': ['Purchases', 'Carriage Inward', 'Manufacturing Wages', 'Direct Expense'],
+      'Indirect Expenses': ['Salaries', 'Rent', 'Electricity', 'Printing & Stationery', 'Insurance', 'Depreciation', 'Finance Cost', 'Tax']
+    }
   };
 
   const categoryIcons = {
@@ -382,7 +404,13 @@ const ChartOfAccounts = () => {
                     <div className="relative">
                       <select 
                         value={newAccntCat} 
-                        onChange={e=>{setNewAccntCat(e.target.value); setNewAccntSubCat(subCatMap[e.target.value][0]);}} 
+                        onChange={e=>{
+                          const cat = e.target.value;
+                          const firstGroup = Object.keys(subCatMap[cat])[0];
+                          setNewAccntCat(cat); 
+                          setNewAccntGroup(firstGroup);
+                          setNewAccntSubCat(subCatMap[cat][firstGroup][0]);
+                        }} 
                         className="w-full bg-bg border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
                       >
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -404,17 +432,37 @@ const ChartOfAccounts = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Sub-Category</label>
-                  <div className="relative">
-                    <select 
-                      value={newAccntSubCat} 
-                      onChange={e=>setNewAccntSubCat(e.target.value)} 
-                      className="w-full bg-bg border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
-                    >
-                      {subCatMap[newAccntCat].map(sc => <option key={sc} value={sc}>{sc}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary" size={16} />
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Account Group</label>
+                    <div className="relative">
+                      <select 
+                        value={newAccntGroup} 
+                        onChange={e => {
+                          const group = e.target.value;
+                          setNewAccntGroup(group);
+                          setNewAccntSubCat(subCatMap[newAccntCat][group][0]);
+                        }} 
+                        className="w-full bg-bg border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                      >
+                        {Object.keys(subCatMap[newAccntCat]).map(g => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary" size={16} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Sub-Heading</label>
+                    <div className="relative">
+                      <select 
+                        value={newAccntSubCat} 
+                        onChange={e => setNewAccntSubCat(e.target.value)} 
+                        className="w-full bg-bg border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                      >
+                        {(subCatMap[newAccntCat]?.[newAccntGroup] || []).map(sc => <option key={sc} value={sc}>{sc}</option>)}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary" size={16} />
+                    </div>
                   </div>
                 </div>
 
