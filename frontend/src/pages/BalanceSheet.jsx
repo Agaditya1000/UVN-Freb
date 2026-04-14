@@ -211,7 +211,6 @@ function BalanceSheet() {
         <div className="glass rounded-2xl p-6 md:p-8 mb-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-5">
             <div>
-              <p className="teal-badge mb-3">Professional Template</p>
               <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">Balance Sheet</h1>
               <p className="text-sm md:text-base text-lightWhite/70">
                 Classified statement format aligned with project accounting flow
@@ -227,7 +226,7 @@ function BalanceSheet() {
               {isBalanced ? 'Balanced' : 'Not Balanced'}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 rounded-xl border border-white/10 p-4 bg-white/[0.02]">
             <label className="block">
               <span className="text-xs text-lightWhite/70 uppercase tracking-wider">Entity</span>
               <input
@@ -284,7 +283,7 @@ function BalanceSheet() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="glass rounded-2xl p-6 md:p-7">
+          <div className="glass rounded-2xl p-6 md:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
             <div className="mb-5 pb-3 border-b border-white/10">
               <h2 className="text-2xl font-semibold text-white">Assets</h2>
             </div>
@@ -295,7 +294,7 @@ function BalanceSheet() {
             </div>
           </div>
 
-          <div className="glass rounded-2xl p-6 md:p-7">
+          <div className="glass rounded-2xl p-6 md:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
             <div className="mb-5 pb-3 border-b border-white/10">
               <h2 className="text-2xl font-semibold text-white">Liabilities and Equity</h2>
             </div>
