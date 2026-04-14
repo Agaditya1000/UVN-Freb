@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import BalanceSheet from './pages/BalanceSheet';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -26,9 +27,21 @@ function App() {
                   <div className="flex flex-col h-screen items-center justify-center bg-black text-white px-4">
                     <h2 className="text-3xl font-medium tracking-heading mb-4">Dashboard Protected View</h2>
                     <p className="text-lightWhite">Available to Owner, Accountant, and Viewer.</p>
+                    <Link to="/balance-sheet" className="btn-primary mt-6">
+                      Open Balance Sheet
+                    </Link>
                   </div>
                 </ProtectedRoute>
               } 
+            />
+
+            <Route
+              path="/balance-sheet"
+              element={
+                <ProtectedRoute>
+                  <BalanceSheet />
+                </ProtectedRoute>
+              }
             />
             
             <Route 
