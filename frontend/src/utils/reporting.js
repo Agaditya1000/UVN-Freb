@@ -197,6 +197,30 @@ export function buildGeneralLedger(account, allTransactionsSortedAsc) {
   return lines;
 }
 
+/** GST summary (India): aggregates transaction.tax metadata by rate/type for a period. */
+export function buildGstSummary(transactions, fromDate, toDate) {
+  const slice = filterTransactionsByRange(transactions || [], fromDate, toDate);
+  const rows = [];
+  const map = new Map();
+
+  for (const tx of slice) {
+    const t = tx.tax;
+    if (!t || t.regime !== 'GST') continue;
+    const key = `${t.type || 'GST'}|${t.rate || 0}`;
+    const prev = map.get(key) || { type: t.type || 'GST', rate: Number(t.rate) || 0, base: 0, tax: 0, count: 0 };
+    prev.base += Number(t.base) || 0;
+    prev.tax += Number(t.amount) || 0;
+    prev.count += 1;
+    map.set(key, prev);
+  }
+
+  for (const v of map.values()) rows.push(v);
+  rows.sort((a, b) => (a.type || '').localeCompare(b.type || '') || a.rate - b.rate);
+  const totalBase = rows.reduce((s, r) => s + r.base, 0);
+  const totalTax = rows.reduce((s, r) => s + r.tax, 0);
+  return { rows, totalBase, totalTax, txCount: rows.reduce((s, r) => s + r.count, 0) };
+}
+
 export function buildCashFlowStatement(accounts, transactions, fromDate, toDate) {
   const pnl = buildProfitAndLoss(accounts, filterTransactionsByRange(transactions, fromDate, toDate));
   

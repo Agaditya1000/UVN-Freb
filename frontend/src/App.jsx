@@ -26,6 +26,7 @@ import TradingAccountReport from './pages/dashboard/reports/TradingAccountReport
 import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
 import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
 import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
+import GstReport from './pages/dashboard/reports/GstReport';
 import AssignedUsers from './pages/dashboard/AssignedUsers';
 import AuditLogView from './pages/dashboard/AuditLogView';
 
@@ -59,6 +60,7 @@ function App() {
                 <Route path="trial-balance" element={<TrialBalanceReport />} />
                 <Route path="trading-account" element={<TradingAccountReport />} />
                 <Route path="profit-loss" element={<ProfitLossReport />} />
+                <Route path="gst" element={<GstReport />} />
                 <Route path="general-ledger" element={<GeneralLedgerReport />} />
                 <Route path="balance-sheet" element={<ReportBalanceSheetShell />} />
                 <Route path="cash-flow" element={<CashFlowReport />} />

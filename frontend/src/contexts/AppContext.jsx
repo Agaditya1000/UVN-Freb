@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
+import { getCoaTemplateForCountry } from '../utils/coaTemplates';
 
 const AppContext = createContext();
 
@@ -139,6 +140,29 @@ export const AppProvider = ({ children }) => {
     const newBusiness = { id: newId, ...businessData };
     setBusinesses(prev => [newBusiness, ...prev]);
     setActiveBusinessId(newId);
+
+    // Seed a region-appropriate Chart of Accounts template.
+    // Note: backend schema currently uses a global PK on accounts.id; templates use region prefixes
+    // to avoid collisions across multiple businesses.
+    try {
+      const template = getCoaTemplateForCountry(businessData?.country);
+      if (template?.length) {
+        const rows = template.map((a) => ({
+          ...a,
+          business_id: newId,
+          balance: 0,
+        }));
+        const { error: seedError } = await supabase
+          .from('accounts')
+          .upsert(rows, { onConflict: 'id' });
+        if (seedError) {
+          console.warn('COA seed skipped/failed:', seedError.message || seedError);
+        }
+      }
+    } catch (e) {
+      console.warn('COA seed failed:', e);
+    }
+
     return { success: true };
   };
 

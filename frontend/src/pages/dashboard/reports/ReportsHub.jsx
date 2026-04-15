@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Scale, TrendingUp, BookOpen, Landmark, ArrowRightLeft, ArrowRight } from 'lucide-react';
+import { Scale, TrendingUp, BookOpen, Landmark, ArrowRightLeft, ArrowRight, ReceiptIndianRupee } from 'lucide-react';
 import { defaultPeriodDates, todayISODate } from '../../../utils/reporting';
+import { useApp } from '../../../contexts/AppContext';
 
 const ReportsHub = () => {
+  const { activeBusiness } = useApp();
   const { from, to } = defaultPeriodDates();
   const asOf = todayISODate();
 
@@ -26,6 +28,16 @@ const ReportsHub = () => {
       to: `/dashboard/reports/profit-loss?from=${from}&to=${to}`,
       icon: TrendingUp,
     },
+    ...(activeBusiness?.country === 'India'
+      ? [
+          {
+            title: 'GST summary',
+            desc: 'Aggregated GST captured on entries for a period (operational summary).',
+            to: `/dashboard/reports/gst?from=${from}&to=${to}`,
+            icon: ReceiptIndianRupee,
+          },
+        ]
+      : []),
     {
       title: 'General ledger',
       desc: 'Detailed activity for a single account, in date order, with a running balance.',

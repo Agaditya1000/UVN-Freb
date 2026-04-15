@@ -60,6 +60,9 @@ const Transactions = () => {
   const [debitAcc, setDebitAcc] = useState('');
   const [creditAcc, setCreditAcc] = useState('');
   const [amount, setAmount] = useState('');
+  const [includeTax, setIncludeTax] = useState(false);
+  const [taxType, setTaxType] = useState('IGST');
+  const [taxRate, setTaxRate] = useState('18');
 
   if (!activeBusiness) return null;
 
@@ -71,6 +74,9 @@ const Transactions = () => {
     setDebitAcc('');
     setCreditAcc('');
     setAmount('');
+    setIncludeTax(false);
+    setTaxType('IGST');
+    setTaxRate('18');
     setShowModal(true);
   };
 
@@ -82,6 +88,9 @@ const Transactions = () => {
     setDebitAcc(tx.debits[0].accountId);
     setCreditAcc(tx.credits[0].accountId);
     setAmount(tx.debits[0].amount);
+    setIncludeTax(Boolean(tx.tax));
+    setTaxType(tx.tax?.type || 'IGST');
+    setTaxRate(String(tx.tax?.rate ?? '18'));
     setShowModal(true);
   };
 
@@ -90,11 +99,23 @@ const Transactions = () => {
     setLoading(true);
 
     if (date && desc && debitAcc && creditAcc && parseFloat(amount) > 0) {
+      const baseAmount = parseFloat(amount);
+      const tax = includeTax
+        ? {
+            regime: activeBusiness?.country === 'India' ? 'GST' : 'TAX',
+            type: taxType,
+            rate: Number(taxRate) || 0,
+            base: baseAmount,
+            amount: Number(((baseAmount * (Number(taxRate) || 0)) / 100).toFixed(2)),
+          }
+        : null;
+
       const payload = {
         date,
         description: desc,
         debits: [{ accountId: debitAcc, amount: parseFloat(amount) }],
-        credits: [{ accountId: creditAcc, amount: parseFloat(amount) }]
+        credits: [{ accountId: creditAcc, amount: parseFloat(amount) }],
+        ...(tax ? { tax } : {}),
       };
 
       const result = modalMode === 'edit' 
@@ -336,6 +357,68 @@ const Transactions = () => {
                 <AnimatedDropdown label="Debit Account" value={debitAcc} setValue={setDebitAcc} options={accounts} color="text-emerald-500" />
                 <AnimatedDropdown label="Credit Account" value={creditAcc} setValue={setCreditAcc} options={accounts} color="text-rose-500" />
               </div>
+
+              {activeBusiness?.country === 'India' && (
+                <div className="bg-bg border border-border rounded-2xl p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">
+                        Tax (GST)
+                      </p>
+                      <p className="text-xs text-text-secondary font-medium mt-1 leading-relaxed">
+                        Optional tax metadata for GST reporting. This does not change debit/credit totals.
+                      </p>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-text-secondary">
+                      <input
+                        type="checkbox"
+                        checked={includeTax}
+                        onChange={(e) => setIncludeTax(e.target.checked)}
+                      />
+                      Include
+                    </label>
+                  </div>
+
+                  {includeTax && (
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                          GST type
+                        </label>
+                        <select
+                          value={taxType}
+                          onChange={(e) => setTaxType(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                        >
+                          <option value="IGST">IGST (inter-state)</option>
+                          <option value="CGST_SGST">CGST + SGST (intra-state)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                          GST rate
+                        </label>
+                        <select
+                          value={taxRate}
+                          onChange={(e) => setTaxRate(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                        >
+                          {['0', '5', '12', '18', '28'].map((r) => (
+                            <option key={r} value={r}>
+                              {r}%
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="col-span-2 text-xs text-text-secondary font-medium">
+                        Computed tax: <span className="text-text font-bold tabular-nums">
+                          {Number(((parseFloat(amount || '0') * (Number(taxRate) || 0)) / 100).toFixed(2)).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-4 pt-6">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-black">
