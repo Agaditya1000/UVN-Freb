@@ -48,7 +48,7 @@ const AnimatedDropdown = ({ label, value, setValue, options, color }) => {
 };
 
 const Transactions = () => {
-  const { activeBusiness, accounts, transactions, addTransaction, updateTransaction, deleteTransaction, userRole } = useApp();
+  const { activeBusiness, accounts, transactions, addTransaction, postGstJournal, updateTransaction, deleteTransaction, userRole } = useApp();
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add', 'edit'
@@ -63,6 +63,10 @@ const Transactions = () => {
   const [includeTax, setIncludeTax] = useState(false);
   const [taxType, setTaxType] = useState('IGST');
   const [taxRate, setTaxRate] = useState('18');
+  const [voucherKind, setVoucherKind] = useState('purchase');
+  const [hsnSac, setHsnSac] = useState('');
+  const [placeOfSupply, setPlaceOfSupply] = useState('');
+  const [itcEligible, setItcEligible] = useState(true);
 
   if (!activeBusiness) return null;
 
@@ -77,10 +81,24 @@ const Transactions = () => {
     setIncludeTax(false);
     setTaxType('IGST');
     setTaxRate('18');
+    setVoucherKind('purchase');
+    setHsnSac('');
+    setPlaceOfSupply('');
+    setItcEligible(true);
     setShowModal(true);
   };
 
   const openEditModal = (tx) => {
+    const multiLine =
+      (tx.debits?.length || 0) > 1 ||
+      (tx.credits?.length || 0) > 1 ||
+      tx.tax?.posting_engine === 'rpc_v1';
+    if (multiLine) {
+      window.alert(
+        'This entry was posted with split GST lines (server-side). Edit it in the database or delete and re-post; the form cannot safely rewrite these vouchers.'
+      );
+      return;
+    }
     setModalMode('edit');
     setSelectedTx(tx);
     setDate(tx.date);
@@ -91,6 +109,10 @@ const Transactions = () => {
     setIncludeTax(Boolean(tx.tax));
     setTaxType(tx.tax?.type || 'IGST');
     setTaxRate(String(tx.tax?.rate ?? '18'));
+    setVoucherKind(tx.tax?.kind === 'sale' ? 'sale' : 'purchase');
+    setHsnSac(tx.tax?.hsn_sac || '');
+    setPlaceOfSupply(tx.tax?.place_of_supply || '');
+    setItcEligible(tx.tax?.itc_eligible !== false);
     setShowModal(true);
   };
 
@@ -100,27 +122,61 @@ const Transactions = () => {
 
     if (date && desc && debitAcc && creditAcc && parseFloat(amount) > 0) {
       const baseAmount = parseFloat(amount);
-      const tax = includeTax
-        ? {
-            regime: activeBusiness?.country === 'India' ? 'GST' : 'TAX',
-            type: taxType,
-            rate: Number(taxRate) || 0,
-            base: baseAmount,
-            amount: Number(((baseAmount * (Number(taxRate) || 0)) / 100).toFixed(2)),
-          }
-        : null;
+      const useIndiaGstRpc =
+        activeBusiness?.country === 'India' &&
+        includeTax &&
+        modalMode === 'add';
 
-      const payload = {
-        date,
-        description: desc,
-        debits: [{ accountId: debitAcc, amount: parseFloat(amount) }],
-        credits: [{ accountId: creditAcc, amount: parseFloat(amount) }],
-        ...(tax ? { tax } : {}),
-      };
+      let result;
+      if (useIndiaGstRpc) {
+        const mainAccountId = voucherKind === 'purchase' ? debitAcc : creditAcc;
+        const counterpartyAccountId = voucherKind === 'purchase' ? creditAcc : debitAcc;
+        result = await postGstJournal({
+          date,
+          description: desc,
+          kind: voucherKind,
+          mainAccountId,
+          counterpartyAccountId,
+          taxableBase: baseAmount,
+          taxType,
+          taxRate: Number(taxRate) || 0,
+          hsnSac: hsnSac.trim() || null,
+          placeOfSupply: placeOfSupply.trim() || null,
+          itcEligible,
+        });
+      } else {
+        const tax =
+          includeTax && !useIndiaGstRpc
+            ? {
+                regime: activeBusiness?.country === 'India' ? 'GST' : 'TAX',
+                type: taxType,
+                rate: Number(taxRate) || 0,
+                base: baseAmount,
+                amount: Number(((baseAmount * (Number(taxRate) || 0)) / 100).toFixed(2)),
+                ...(activeBusiness?.country === 'India'
+                  ? {
+                      kind: voucherKind,
+                      hsn_sac: hsnSac.trim() || undefined,
+                      place_of_supply: placeOfSupply.trim() || undefined,
+                      itc_eligible: itcEligible,
+                    }
+                  : {}),
+              }
+            : null;
 
-      const result = modalMode === 'edit' 
-        ? await updateTransaction(selectedTx.id, payload)
-        : await addTransaction(payload);
+        const payload = {
+          date,
+          description: desc,
+          debits: [{ accountId: debitAcc, amount: parseFloat(amount) }],
+          credits: [{ accountId: creditAcc, amount: parseFloat(amount) }],
+          ...(tax ? { tax } : {}),
+        };
+
+        result =
+          modalMode === 'edit'
+            ? await updateTransaction(selectedTx.id, payload)
+            : await addTransaction(payload);
+      }
 
       if (result.success) {
         setShowModal(false);
@@ -340,7 +396,7 @@ const Transactions = () => {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
-                    Amount
+                    {activeBusiness?.country === 'India' && includeTax ? 'Taxable base (ex-GST)' : 'Amount'}
                   </label>
                   <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-bg border border-border rounded-2xl p-4" required />
                 </div>
@@ -366,7 +422,9 @@ const Transactions = () => {
                         Tax (GST)
                       </p>
                       <p className="text-xs text-text-secondary font-medium mt-1 leading-relaxed">
-                        Optional tax metadata for GST reporting. This does not change debit/credit totals.
+                        {modalMode === 'add'
+                          ? 'New entries with GST use a server RPC to post balanced split tax lines and a normalized tax row (audit trail).'
+                          : 'Tax fields on edit apply to simple single-line vouchers only.'}
                       </p>
                     </div>
                     <label className="flex items-center gap-2 text-xs font-bold text-text-secondary">
@@ -381,6 +439,20 @@ const Transactions = () => {
 
                   {includeTax && (
                     <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                          Voucher type
+                        </label>
+                        <select
+                          value={voucherKind}
+                          onChange={(e) => setVoucherKind(e.target.value)}
+                          disabled={modalMode === 'edit'}
+                          className="w-full bg-surface border border-border rounded-2xl p-4 text-text focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer disabled:opacity-50"
+                        >
+                          <option value="purchase">Purchase (Dr expense/stock · Cr creditor)</option>
+                          <option value="sale">Sale (Dr debtor · Cr revenue)</option>
+                        </select>
+                      </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
                           GST type
@@ -415,6 +487,38 @@ const Transactions = () => {
                           {Number(((parseFloat(amount || '0') * (Number(taxRate) || 0)) / 100).toFixed(2)).toLocaleString()}
                         </span>
                       </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                          HSN / SAC (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={hsnSac}
+                          onChange={(e) => setHsnSac(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-2xl p-4 text-text"
+                          placeholder="e.g. 6204"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">
+                          Place of supply (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={placeOfSupply}
+                          onChange={(e) => setPlaceOfSupply(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-2xl p-4 text-text"
+                          placeholder="State code or name"
+                        />
+                      </div>
+                      <label className="col-span-2 flex items-center gap-2 text-xs font-bold text-text-secondary">
+                        <input
+                          type="checkbox"
+                          checked={itcEligible}
+                          onChange={(e) => setItcEligible(e.target.checked)}
+                        />
+                        ITC eligible (purchases)
+                      </label>
                     </div>
                   )}
                 </div>

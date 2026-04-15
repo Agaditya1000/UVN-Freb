@@ -18,6 +18,7 @@ To ensure your SaaS infrastructure is built correctly, please execute these file
 | **05** | `05_integrity_setup.sql`| **Audit Protection** | **Critical**: Database-level triggers that block any unbalanced transactions. |
 | **06** | `06_reporting_analytics.sql`| **Reporting Views** | Optimized PostgreSQL views for real-time Trading, P&L, and Balance Sheet data. |
 | **07** | `07_tax_compliance.sql`| **Tax Foundation** | Adds tax metadata to transactions for GST/VAT summaries and regional compliance. |
+| **08** | `08_gst_audit_posting.sql`| **GST audit posting** | `transaction_tax_lines` table + `post_gst_journal` RPC (balanced split GST + normalized tax row). |
 
 ---
 

@@ -42,11 +42,15 @@ const IN_INDAS_GST = [
   { id: 'IN-1100', name: 'Sundry debtors', category: 'Asset', sub_category: 'Current Asset' },
   { id: 'IN-1200', name: 'Stock-in-trade', category: 'Asset', sub_category: 'Current Asset' },
   { id: 'IN-1500', name: 'Fixed assets', category: 'Asset', sub_category: 'Fixed Asset' },
-  // GST ledgers (simplified; real implementations split by rate and tax head)
-  { id: 'IN-1400', name: 'Input GST', category: 'Asset', sub_category: 'Other Asset' },
+  // GST ledgers (split heads for intra-state; IGST uses IN-1400 / IN-2400)
+  { id: 'IN-1400', name: 'Input IGST', category: 'Asset', sub_category: 'Other Asset' },
+  { id: 'IN-1411', name: 'Input CGST', category: 'Asset', sub_category: 'Other Asset' },
+  { id: 'IN-1421', name: 'Input SGST', category: 'Asset', sub_category: 'Other Asset' },
   // Liabilities
   { id: 'IN-2000', name: 'Sundry creditors', category: 'Liability', sub_category: 'Current Liability' },
-  { id: 'IN-2400', name: 'Output GST', category: 'Liability', sub_category: 'Current Liability' },
+  { id: 'IN-2400', name: 'Output IGST', category: 'Liability', sub_category: 'Current Liability' },
+  { id: 'IN-2411', name: 'Output CGST', category: 'Liability', sub_category: 'Current Liability' },
+  { id: 'IN-2421', name: 'Output SGST', category: 'Liability', sub_category: 'Current Liability' },
   { id: 'IN-2500', name: 'Secured loans', category: 'Liability', sub_category: 'Long-Term Liability' },
   // Equity
   { id: 'IN-3000', name: 'Capital', category: 'Equity', sub_category: 'Capital & Reserves' },

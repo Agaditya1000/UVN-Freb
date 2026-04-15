@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../../../contexts/AppContext';
 import { buildGstSummary, defaultPeriodDates } from '../../../utils/reporting';
-import { ReceiptIndianRupee } from 'lucide-react';
+import { buildGstr1Draft } from '../../../utils/gstrExport';
+import { ReceiptIndianRupee, Download } from 'lucide-react';
 
 const GstReport = () => {
   const { activeBusiness, transactions, loading } = useApp();
@@ -75,6 +76,28 @@ const GstReport = () => {
             onChange={(e) => setRange(from, e.target.value)}
             className="input-field w-auto min-w-[10rem]"
           />
+        </div>
+        <div className="flex flex-col justify-end gap-1">
+          <button
+            type="button"
+            className="btn-primary inline-flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+            onClick={() => {
+              const draft = buildGstr1Draft(transactions || [], from, to);
+              const blob = new Blob([JSON.stringify(draft, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `gstr1-style-draft-${from}-to-${to}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            <Download size={16} />
+            GSTR-1 style JSON
+          </button>
+          <span className="text-[10px] text-text-secondary font-medium max-w-xs">
+            Internal draft from sale lines with GST metadata — not a fileable return.
+          </span>
         </div>
       </div>
 
