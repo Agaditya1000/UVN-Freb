@@ -10,12 +10,40 @@
 
       if (!activeBusiness) {
         return (
-          <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text text-center">
-            <Building2 size={64} className="text-text-secondary mb-4" />
-            <h2 className="text-2xl font-bold mb-2">No Active Business</h2>
-            <p className="text-text-secondary">
-              Please select or create a business profile from the navigation menu.
+          <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text text-center p-6 bg-gradient-to-b from-bg to-surface/30">
+            <div className="w-28 h-28 bg-white border border-border rounded-[2.5rem] flex items-center justify-center text-primary mb-8 shadow-2xl shadow-primary/10 relative">
+              <div className="absolute inset-0 bg-primary/5 rounded-[2.5rem] animate-pulse"></div>
+              <Building2 size={56} className="relative z-10" />
+            </div>
+            
+            <h2 className="text-4xl font-extrabold mb-4 tracking-tighter text-text">Initialize Your Workspace</h2>
+            <p className="text-text-secondary max-w-sm mx-auto font-medium mb-12 leading-relaxed text-lg">
+              Welcome to the elite financial engine. To begin managing your utilities, you must first establish your business profile.
             </p>
+            
+            {userRole === 'Owner' || !userRole ? (
+              <button 
+                onClick={() => navigate('/dashboard/business')}
+                className="group relative px-10 py-5 bg-primary text-white font-bold rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <div className="flex items-center gap-3 relative z-10">
+                  <Building2 size={22} />
+                  <span className="uppercase tracking-[0.2em] text-xs">Establish First Business</span>
+                </div>
+              </button>
+            ) : (
+                <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                    <div className="w-12 h-1 border-t-2 border-primary/20 mb-2"></div>
+                    <p className="text-[10px] text-text-secondary font-black uppercase tracking-[0.3em] opacity-60">
+                        Synchronizing Collaborative Workspace...
+                    </p>
+                </div>
+            )}
+            
+            <div className="mt-16 pt-8 border-t border-border/50 w-full max-w-xs opacity-40">
+                <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">UV Netware Security Enforcement</p>
+            </div>
           </div>
         );
       }

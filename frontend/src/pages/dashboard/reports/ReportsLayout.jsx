@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { FileBarChart, Scale, TrendingUp, BookOpen, ArrowRightLeft, Landmark } from 'lucide-react';
+import { FileBarChart, Scale, TrendingUp, BookOpen, ArrowRightLeft, Landmark, LayoutGrid } from 'lucide-react';
 import Footer from '../../../components/Footer';
 
 const links = [
   { to: '/dashboard/reports', end: true, label: 'Overview', icon: FileBarChart },
   { to: '/dashboard/reports/trial-balance', end: false, label: 'Trial balance', icon: Scale },
+  { to: '/dashboard/reports/trading-account', end: false, label: 'Trading Account', icon: LayoutGrid },
   { to: '/dashboard/reports/profit-loss', end: false, label: 'Profit & loss', icon: TrendingUp },
   { to: '/dashboard/reports/general-ledger', end: false, label: 'General ledger', icon: BookOpen },
   { to: '/dashboard/reports/balance-sheet', end: false, label: 'Balance sheet', icon: Landmark },

@@ -16,7 +16,7 @@ export const AppProvider = ({ children }) => {
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [team, setTeam] = useState([]);
-  const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState(role); // Initialize with global role
   const [loading, setLoading] = useState(false);
 
   // Fetch businesses user has access to
@@ -83,7 +83,7 @@ export const AppProvider = ({ children }) => {
         // 4. Load Team Members (if possible)
         const { data: teamData, error: teamError } = await supabase
           .from('business_users')
-          .select('*, users(email, full_name, id)')
+          .select('*, users(email, full_name, id, role)')
           .eq('business_id', activeBusinessId);
         
         if (!teamError && teamData) {
@@ -97,7 +97,14 @@ export const AppProvider = ({ children }) => {
     };
 
     fetchData();
-  }, [activeBusinessId, user]);
+  }, [activeBusinessId, user, role]);
+
+  // Sync role for new users or when business list is empty
+  useEffect(() => {
+    if (!activeBusinessId && role) {
+      setUserRole(role);
+    }
+  }, [activeBusinessId, role]);
 
   const activeBusiness = businesses.find(b => b.id === activeBusinessId) || null;
 
@@ -111,7 +118,10 @@ export const AppProvider = ({ children }) => {
       .from('businesses')
       .insert([{ id: newId, ...businessData }]);
       
-    if (bError) return { success: false, error: bError };
+    if (bError) {
+      console.error("Business provision error:", bError);
+      return { success: false, error: bError };
+    }
     
     const { error: mapError } = await supabase
       .from('business_users')
@@ -121,7 +131,10 @@ export const AppProvider = ({ children }) => {
         role: 'Owner'
       }]);
       
-    if (mapError) return { success: false, error: mapError };
+    if (mapError) {
+      console.error("Mapping error:", mapError);
+      return { success: false, error: mapError };
+    }
     
     const newBusiness = { id: newId, ...businessData };
     setBusinesses(prev => [newBusiness, ...prev]);
@@ -161,6 +174,37 @@ export const AppProvider = ({ children }) => {
     if (error) return { success: false, error };
 
     setTransactions(prev => [data[0], ...prev]);
+    return { success: true };
+  };
+
+  const updateTransaction = async (id, updatedData) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { data, error } = await supabase
+      .from('transactions')
+      .update(updatedData)
+      .eq('id', id)
+      .eq('business_id', activeBusinessId)
+      .select();
+
+    if (error) return { success: false, error };
+
+    setTransactions(prev => prev.map(t => t.id === id ? data[0] : t));
+    return { success: true };
+  };
+
+  const deleteTransaction = async (id) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('business_id', activeBusinessId);
+
+    if (error) return { success: false, error };
+
+    setTransactions(prev => prev.filter(t => t.id !== id));
     return { success: true };
   };
 
@@ -254,7 +298,7 @@ export const AppProvider = ({ children }) => {
     // Refresh team
     const { data: teamData } = await supabase
       .from('business_users')
-      .select('*, users(email, full_name, id)')
+      .select('*, users(email, full_name, id, role)')
       .eq('business_id', activeBusinessId);
     
     if (teamData) setTeam(teamData);
@@ -277,6 +321,16 @@ export const AppProvider = ({ children }) => {
     return { success: true };
   };
 
+  // Invitation Management
+  const createInviteLink = async (role) => {
+    if (!activeBusinessId) return { success: false, error: 'No active business' };
+    
+    // In a real app, this would create a token in the 'invitations' table
+    // For now, we simulate a shareable business link
+    const inviteLink = `${window.location.origin}/signup?businessId=${activeBusinessId}&role=${role}`;
+    return { success: true, link: inviteLink };
+  };
+
   const value = {
     businesses,
     activeBusiness,
@@ -288,11 +342,14 @@ export const AppProvider = ({ children }) => {
     deleteAccount,
     transactions,
     addTransaction,
+    updateTransaction,
+    deleteTransaction,
     loading,
     userRole,
     team,
     assignUser,
-    revokeUser
+    revokeUser,
+    createInviteLink
   };
 
   return (

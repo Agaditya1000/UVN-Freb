@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AppProvider } from './contexts/AppContext';
+import GlobalErrorBoundary from './components/GlobalErrorBoundary';
 
 import DashboardLayout from './components/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
@@ -21,13 +22,16 @@ import ReportsLayout from './pages/dashboard/reports/ReportsLayout';
 import ReportsHub from './pages/dashboard/reports/ReportsHub';
 import TrialBalanceReport from './pages/dashboard/reports/TrialBalanceReport';
 import ProfitLossReport from './pages/dashboard/reports/ProfitLossReport';
+import TradingAccountReport from './pages/dashboard/reports/TradingAccountReport';
 import GeneralLedgerReport from './pages/dashboard/reports/GeneralLedgerReport';
 import CashFlowReport from './pages/dashboard/reports/CashFlowReport';
 import ReportBalanceSheetShell from './pages/dashboard/reports/ReportBalanceSheetShell';
 import AssignedUsers from './pages/dashboard/AssignedUsers';
+import AuditLogView from './pages/dashboard/AuditLogView';
 
 function App() {
   return (
+    <GlobalErrorBoundary>
     <ThemeProvider>
     <AuthProvider>
     <AppProvider>
@@ -53,12 +57,14 @@ function App() {
               <Route path="reports" element={<ReportsLayout />}>
                 <Route index element={<ReportsHub />} />
                 <Route path="trial-balance" element={<TrialBalanceReport />} />
+                <Route path="trading-account" element={<TradingAccountReport />} />
                 <Route path="profit-loss" element={<ProfitLossReport />} />
                 <Route path="general-ledger" element={<GeneralLedgerReport />} />
                 <Route path="balance-sheet" element={<ReportBalanceSheetShell />} />
                 <Route path="cash-flow" element={<CashFlowReport />} />
               </Route>
               <Route path="assigned" element={<AssignedUsers />} />
+              <Route path="audit-log" element={<AuditLogView />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             
@@ -77,6 +83,7 @@ function App() {
     </AppProvider>
     </AuthProvider>
     </ThemeProvider>
+    </GlobalErrorBoundary>
   );
 }
 

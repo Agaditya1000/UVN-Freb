@@ -22,14 +22,16 @@ export function computeBalanceForAccount(account, transactionsFiltered) {
   const cat = account.category;
   for (const tx of transactionsFiltered) {
     for (const d of tx.debits || []) {
-      if (d.accountId !== account.id) continue;
-      if (['Asset', 'Expense'].includes(cat)) balance += d.amount;
-      else balance -= d.amount;
+      if (String(d.accountId) !== String(account.id)) continue;
+      const amt = Number(d.amount) || 0;
+      if (['Asset', 'Expense'].includes(cat)) balance += amt;
+      else balance -= amt;
     }
     for (const c of tx.credits || []) {
-      if (c.accountId !== account.id) continue;
-      if (['Asset', 'Expense'].includes(cat)) balance -= c.amount;
-      else balance += c.amount;
+      if (String(c.accountId) !== String(account.id)) continue;
+      const amt = Number(c.amount) || 0;
+      if (['Asset', 'Expense'].includes(cat)) balance -= amt;
+      else balance += amt;
     }
   }
   return balance;
@@ -76,29 +78,82 @@ export function buildTrialBalance(accounts, transactionsInPeriod) {
   };
 }
 
-/** P&L for period: Revenue and Expense activity from period transactions only. */
-export function buildProfitAndLoss(accounts, transactionsInPeriod) {
-  const relevant = accounts.filter((a) => ['Revenue', 'Expense'].includes(a.category));
-  const withBal = computeAllBalances(relevant, transactionsInPeriod);
-  const revenueLines = [];
-  const expenseLines = [];
-  let revenue = 0;
-  let expense = 0;
-  for (const a of withBal) {
-    if (a.category === 'Revenue') {
-      revenueLines.push(a);
-      revenue += a.balance;
-    } else {
-      expenseLines.push(a);
-      expense += a.balance;
-    }
-  }
+/** P&L for period: Indirect Revenue and Indirect Expense activity. */
+export function buildProfitAndLoss(accounts, transactionsInPeriod, grossProfit = 0) {
+  // Only include items that ARE NOT Direct (those go to the Trading Account)
+  const tradingRevenueSubCats = ['Direct Revenue', 'Service Income'];
+  const tradingExpenseSubCats = ['Purchases', 'Carriage Inward', 'Manufacturing Wages', 'Direct Expense'];
+
+  const indirectRevenueAccounts = accounts.filter((a) => a.category === 'Revenue' && !tradingRevenueSubCats.includes(a.sub_category));
+  const indirectExpenseAccounts = accounts.filter((a) => a.category === 'Expense' && !tradingExpenseSubCats.includes(a.sub_category));
+
+  const revenueLines = indirectRevenueAccounts.map(a => ({
+    ...a,
+    balance: computeBalanceForAccount(a, transactionsInPeriod)
+  })).filter(a => a.balance !== 0);
+
+  const expenseLines = indirectExpenseAccounts.map(a => ({
+    ...a,
+    balance: computeBalanceForAccount(a, transactionsInPeriod)
+  })).filter(a => a.balance !== 0);
+
+  const totalOtherIncome = revenueLines.reduce((s, a) => s + a.balance, 0);
+  const totalOtherExpenses = expenseLines.reduce((s, a) => s + a.balance, 0);
+
   return {
     revenueLines,
     expenseLines,
-    revenue,
-    expense,
-    netIncome: revenue - expense,
+    totalOtherIncome,
+    totalOtherExpenses,
+    grossProfitPrefilled: grossProfit,
+    netIncome: grossProfit + totalOtherIncome - totalOtherExpenses,
+  };
+}
+
+/** Trading Account: Focuses on Gross Profit (Direct Revenue - COGS) */
+export function buildTradingAccount(accounts, transactions, fromDate, toDate, manualClosingStock = 0) {
+  const periodTransactions = filterTransactionsByRange(transactions, fromDate, toDate);
+  const startTransactions = transactions.filter(t => t.date < fromDate);
+  
+  // 1. Calculate Opening Stock (Inventory balances at start date)
+  const inventoryAccounts = accounts.filter(a => a.sub_category.toLowerCase().includes('asset') && (a.name.toLowerCase().includes('stock') || a.name.toLowerCase().includes('inventory')));
+  const openingStock = inventoryAccounts.reduce((sum, a) => sum + computeBalanceForAccount(a, startTransactions), 0);
+
+  // 2. Fetch Direct Revenue (Sales)
+  const salesSubCats = ['Direct Revenue', 'Service Income'];
+  const salesLines = accounts.filter(a => salesSubCats.includes(a.sub_category)).map(a => ({
+    ...a,
+    balance: computeBalanceForAccount(a, periodTransactions)
+  })).filter(a => a.balance !== 0);
+
+  // 3. Fetch Direct Expenses (Purchases, Wages, etc.)
+  const directExpSubCats = ['Purchases', 'Carriage Inward', 'Manufacturing Wages', 'Direct Expense'];
+  const directExpenseLines = accounts.filter(a => directExpSubCats.includes(a.sub_category)).map(a => ({
+    ...a,
+    balance: computeBalanceForAccount(a, periodTransactions)
+  })).filter(a => a.balance !== 0);
+
+  // Split Purchases from other Direct Expenses for the UI
+  const purchaseLines = directExpenseLines.filter(a => a.sub_category === 'Purchases' || a.name.toLowerCase().includes('purchase'));
+  const otherDirectExpenseLines = directExpenseLines.filter(a => a.sub_category !== 'Purchases' && !a.name.toLowerCase().includes('purchase'));
+
+  const netSales = salesLines.reduce((sum, a) => sum + a.balance, 0);
+  const netPurchases = purchaseLines.reduce((sum, a) => sum + a.balance, 0);
+  const otherDirectExps = otherDirectExpenseLines.reduce((sum, a) => sum + a.balance, 0);
+
+  // Formula: GP = (Sales + ClosingStock) - (OpeningStock + Purchases + DirectExpenses)
+  const grossProfit = (netSales + Number(manualClosingStock)) - (openingStock + netPurchases + otherDirectExps);
+
+  return {
+    openingStock,
+    salesLines,
+    purchaseLines,
+    otherDirectExpenseLines,
+    manualClosingStock: Number(manualClosingStock),
+    netSales,
+    netPurchases,
+    otherDirectExps,
+    grossProfit
   };
 }
 

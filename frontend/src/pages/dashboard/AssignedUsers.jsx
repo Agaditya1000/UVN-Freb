@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Users, 
@@ -11,40 +12,105 @@ import {
   UserCircle,
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Link as LinkIcon,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 const AssignedUsers = () => {
   const { user } = useAuth();
-  const { activeBusiness, userRole, team, assignUser, revokeUser, loading } = useApp();
+  const { activeBusiness, userRole, team, assignUser, revokeUser, createInviteLink, loading } = useApp();
   
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('Viewer');
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState('');
+  const [detectedUser, setDetectedUser] = useState(null);
+
+  // Smart Role Lookup
+  useEffect(() => {
+    const lookupUser = async () => {
+      if (!email || !email.includes('@')) {
+        setDetectedUser(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('role, full_name')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        setDetectedUser(data);
+        setRole(data.role); // Auto-suggest/Select the registered role
+      } else {
+        setDetectedUser(null);
+      }
+    };
+
+    const timeoutId = setTimeout(lookupUser, 500);
+    return () => clearTimeout(timeoutId);
+  }, [email]);
 
   // Security: Only owners can access this page
   if (!loading && userRole !== 'Owner') {
     return <Navigate to="/dashboard" replace />;
   }
 
+  if (!activeBusiness && !loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-20 h-20 bg-surface border border-border rounded-3xl flex items-center justify-center text-text-secondary opacity-20">
+          <Users size={40} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-text">Select Business Context</h2>
+          <p className="text-text-secondary text-sm max-w-xs mx-auto font-medium">
+            You must select a business unit from the top navigation menu before you can manage team access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleAssign = async (e) => {
     e.preventDefault();
     if (!email) return;
+
+    // 1. Check if already assigned locally first
+    const isAlreadyAssigned = team.some(m => m.users?.email?.toLowerCase() === email.toLowerCase());
+    if (isAlreadyAssigned) {
+      setStatus({ type: 'error', msg: 'This user is already a member of your team.' });
+      return;
+    }
 
     setIsSubmitting(true);
     setStatus({ type: '', msg: '' });
 
     const result = await assignUser(email, role);
+    setIsSubmitting(false);
 
     if (result.success) {
       setStatus({ type: 'success', msg: `Successfully assigned ${email} as ${role}` });
       setEmail('');
+      setDetectedUser(null);
     } else {
-      setStatus({ type: 'error', msg: typeof result.error === 'string' ? result.error : 'Failed to assign user. Make sure they have a registered account.' });
+      let errorMessage = result.error?.message || result.error || 'Failed to assign user.';
+      
+      // Friendly message for duplicate key constraint
+      if (errorMessage.includes('unique_constraint') || errorMessage.includes('duplicate key')) {
+        errorMessage = 'This user is already a member of your team.';
+      }
+
+      setStatus({ 
+        type: 'error', 
+        msg: errorMessage
+      });
     }
-    setIsSubmitting(false);
   };
 
   const handleRevoke = async (userId, userEmail) => {
@@ -58,6 +124,15 @@ const AssignedUsers = () => {
       if (!result.success) {
         alert("Failed to revoke access.");
       }
+    }
+  };
+
+  const handleGenerateLink = async () => {
+    const result = await createInviteLink(role);
+    if (result.success) {
+      setGeneratedLink(result.link);
+      navigator.clipboard.writeText(result.link);
+      setStatus({ type: 'success', msg: `Link copied! Send it to your ${role}.` });
     }
   };
 
@@ -128,7 +203,24 @@ const AssignedUsers = () => {
                       </button>
                     ))}
                   </div>
+                  {detectedUser && (
+                    <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest">
+                        Matched registered {detectedUser.role}: {detectedUser.full_name}
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {detectedUser && role !== detectedUser.role && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-2">
+                     <AlertCircle size={14} className="text-red-500" />
+                     <span className="text-[10px] font-bold text-red-600">
+                       Error: This user is already an {detectedUser.role}.
+                     </span>
+                  </div>
+                )}
 
                 {status.msg && (
                   <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-3 ${
@@ -141,8 +233,8 @@ const AssignedUsers = () => {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100"
+                  disabled={isSubmitting || (detectedUser && role !== detectedUser.role)}
+                  className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale disabled:active:scale-100"
                 >
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={18} />}
                   Assign Access
@@ -161,6 +253,30 @@ const AssignedUsers = () => {
                   <span className="text-text font-bold">Accountants</span> can record transactions and edit accounts. <span className="text-text font-bold">Viewers</span> are read-only.
                 </p>
              </div>
+          </div>
+
+          <div className="bg-surface border border-primary/20 p-8 rounded-[2.5rem] shadow-lg space-y-4">
+             <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                  <LinkIcon size={18} />
+                </div>
+                <h3 className="text-lg font-bold text-text">Invite via Link</h3>
+             </div>
+             <p className="text-[11px] text-text-secondary font-medium">
+               Send a link manually if the user isn't registered on the platform yet.
+             </p>
+             <button
+               onClick={handleGenerateLink}
+               className="w-full py-3 bg-bg border border-primary/30 text-primary hover:bg-primary/[0.03] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3"
+             >
+               <Copy size={16} />
+               Generate & Copy Link
+             </button>
+             {generatedLink && (
+               <div className="p-3 bg-bg/50 border border-border rounded-xl text-[10px] text-text-secondary font-mono truncate">
+                 {generatedLink}
+               </div>
+             )}
           </div>
         </div>
 

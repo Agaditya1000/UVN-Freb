@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2, Users } from 'lucide-react';
+import { Menu, MoreVertical, ChevronDown, User, LogOut, Settings, LayoutDashboard, Building2, Users, History } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -187,12 +187,20 @@ const DashboardLayout = () => {
               </div>
               
               {userRole === 'Owner' && (
+                <>
                 <button 
                   onClick={() => { setShowMenu(false); navigate('/dashboard/assigned'); }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors"
                 >
-                  <Users size={16} /> Assigned Users
+                  <Users size={16} /> Team Management
                 </button>
+                <button 
+                  onClick={() => { setShowMenu(false); navigate('/dashboard/audit-log'); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-secondary hover:text-text hover:bg-bg rounded-lg transition-colors"
+                >
+                  <History size={16} /> Audit Log
+                </button>
+                </>
               )}
 
               <button 
