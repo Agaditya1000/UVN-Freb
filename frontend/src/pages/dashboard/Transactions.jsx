@@ -352,12 +352,12 @@ const Transactions = () => {
 
       {showModal && (
         <div 
-          className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-6 z-[9999]"
+          className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-4 md:p-6 z-[9999] overflow-hidden"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowModal(false);
           }}
         >
-          <div className="bg-surface border border-border p-10 w-full max-w-xl rounded-[3rem] shadow-2xl relative">
+          <div className="bg-surface border border-border p-6 md:p-10 w-full max-w-xl rounded-[2rem] md:rounded-[3rem] shadow-2xl relative max-h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar">
 
 
             <button 

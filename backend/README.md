@@ -19,6 +19,7 @@ To ensure your SaaS infrastructure is built correctly, please execute these file
 | **06** | `06_reporting_analytics.sql`| **Reporting Views** | Optimized PostgreSQL views for real-time Trading, P&L, and Balance Sheet data. |
 | **07** | `07_tax_compliance.sql`| **Tax Foundation** | Adds tax metadata to transactions for GST/VAT summaries and regional compliance. |
 | **08** | `08_gst_audit_posting.sql`| **GST audit posting** | `transaction_tax_lines` table + `post_gst_journal` RPC (balanced split GST + normalized tax row). |
+| **09** | `09_audit_log_record_id_hotfix.sql`| **Schema drift hotfix** | Converts `audit_logs.record_id` to `text` to support both UUID and custom account codes. |
 
 ---
 
