@@ -6,6 +6,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { computeAllBalances, filterTransactionsAsOf, buildTradingAccount, buildProfitAndLoss } from '../../utils/reporting';
+import { presentationLabelForCountry } from '../../utils/presentationFramework';
 
 const BalanceSheet = () => {
   const { activeBusiness, accounts: contextAccounts, transactions, loading } = useApp();
@@ -300,6 +301,9 @@ const BalanceSheet = () => {
             </div>
             <h1 className="text-4xl font-extrabold text-text tracking-tight uppercase italic">Balance Sheet</h1>
           </div>
+          <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">
+            {presentationLabelForCountry(activeBusiness.country)}
+          </p>
           <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-text-secondary">
              <div className="flex items-center gap-2"><Calendar size={16} className="text-primary" /><span>As of {statementDateLabel}</span></div>
              <div className="flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-500" /><span>Verified context: {activeBusiness.name}</span></div>

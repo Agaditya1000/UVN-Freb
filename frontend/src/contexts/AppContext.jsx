@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
+import { getCoaTemplateForCountry } from '../utils/coaTemplates';
 
 const AppContext = createContext();
 
@@ -139,6 +140,29 @@ export const AppProvider = ({ children }) => {
     const newBusiness = { id: newId, ...businessData };
     setBusinesses(prev => [newBusiness, ...prev]);
     setActiveBusinessId(newId);
+
+    // Seed a region-appropriate Chart of Accounts template.
+    // Note: backend schema currently uses a global PK on accounts.id; templates use region prefixes
+    // to avoid collisions across multiple businesses.
+    try {
+      const template = getCoaTemplateForCountry(businessData?.country);
+      if (template?.length) {
+        const rows = template.map((a) => ({
+          ...a,
+          business_id: newId,
+          balance: 0,
+        }));
+        const { error: seedError } = await supabase
+          .from('accounts')
+          .upsert(rows, { onConflict: 'id' });
+        if (seedError) {
+          console.warn('COA seed skipped/failed:', seedError.message || seedError);
+        }
+      }
+    } catch (e) {
+      console.warn('COA seed failed:', e);
+    }
+
     return { success: true };
   };
 
@@ -174,6 +198,52 @@ export const AppProvider = ({ children }) => {
     if (error) return { success: false, error };
 
     setTransactions(prev => [data[0], ...prev]);
+    return { success: true };
+  };
+
+  /** India GST: balanced split lines + transaction_tax_lines via SECURITY DEFINER RPC (Step 08). */
+  const postGstJournal = async ({
+    date,
+    description,
+    kind,
+    mainAccountId,
+    counterpartyAccountId,
+    taxableBase,
+    taxType,
+    taxRate,
+    hsnSac,
+    placeOfSupply,
+    itcEligible,
+  }) => {
+    if (!activeBusinessId) return { success: false, error: 'No Active Business' };
+
+    const { data: txId, error } = await supabase.rpc('post_gst_journal', {
+      p_business_id: activeBusinessId,
+      p_date: date,
+      p_description: description,
+      p_kind: kind,
+      p_main_account_id: mainAccountId,
+      p_counterparty_account_id: counterpartyAccountId,
+      p_taxable_base: taxableBase,
+      p_tax_type: taxType,
+      p_tax_rate: taxRate,
+      p_hsn_sac: hsnSac || null,
+      p_place_of_supply: placeOfSupply || null,
+      p_itc_eligible: itcEligible !== false,
+    });
+
+    if (error) return { success: false, error };
+
+    const { data: row, error: fetchErr } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('id', txId)
+      .eq('business_id', activeBusinessId)
+      .single();
+
+    if (fetchErr || !row) return { success: false, error: fetchErr || new Error('Journal fetch failed') };
+
+    setTransactions((prev) => [row, ...prev]);
     return { success: true };
   };
 
@@ -342,6 +412,7 @@ export const AppProvider = ({ children }) => {
     deleteAccount,
     transactions,
     addTransaction,
+    postGstJournal,
     updateTransaction,
     deleteTransaction,
     loading,
