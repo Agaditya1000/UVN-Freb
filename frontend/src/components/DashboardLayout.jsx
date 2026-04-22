@@ -23,19 +23,19 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const logout = async () => {
-    try {
-      setSigningOut(true);
-      await supabase.auth.signOut();
+  const logout = () => {
+    setSigningOut(true);
+    
+    // 1. Kick off the database sign-out in the background
+    supabase.auth.signOut().catch(err => console.error("Sign out background error:", err));
+
+    // 2. Optimistically clear UI and navigate away after a brief visual feedback (800ms)
+    // This ensures the user is never stuck "buffering"
+    setTimeout(() => {
       setShowConfirm(false);
-      navigate('/');
-    } catch (error) {
-      console.error("Sign out error:", error);
-      // Even if there's an error, we should probably force navigate to clear local state
-      navigate('/');
-    } finally {
       setSigningOut(false);
-    }
+      navigate('/');
+    }, 800);
   };
 
   const handleEntityChange = (id) => {
