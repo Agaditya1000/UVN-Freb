@@ -28,10 +28,15 @@ const Login = () => {
     
     if (error) {
       setErrorMsg(error.message);
+      setLoading(false);
     } else {
-      navigate('/dashboard');
+      // Optimistic navigation: move to dashboard quickly on success
+      setTimeout(() => {
+        navigate('/dashboard');
+        // Final fallback to clear local loading if navigate didn't unmount yet
+        setLoading(false);
+      }, 500);
     }
-    setLoading(false);
   };
 
   const handleOAuth = async (provider) => {

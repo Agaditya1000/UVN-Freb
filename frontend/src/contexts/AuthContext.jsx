@@ -17,20 +17,24 @@ export const AuthProvider = ({ children }) => {
   // Fetch the extended profile from public.users
   const fetchProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
+      // Add a 2.5s timeout to the profile fetch to prevent hangs
+      const profilePromise = supabase
         .from('users')
         .select('role')
         .eq('id', userId)
         .single();
       
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), 2500)
+      );
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise]);
+      
       if (!error && data) {
         setDbRole(data.role);
-      } else {
-        // Fallback to metadata if DB fetch fails
-        return null;
       }
     } catch (err) {
-      console.error("Error fetching user profile:", err);
+      console.warn("Profile fetch skipped or timed out, using metadata fallback.");
     }
   };
 
