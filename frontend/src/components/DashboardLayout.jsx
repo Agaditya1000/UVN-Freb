@@ -12,6 +12,7 @@ const DashboardLayout = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showEntity, setShowEntity] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const menuRef = useRef(null);
   const entityRef = useRef(null);
@@ -23,8 +24,18 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      setSigningOut(true);
+      await supabase.auth.signOut();
+      setShowConfirm(false);
+      navigate('/');
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Even if there's an error, we should probably force navigate to clear local state
+      navigate('/');
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   const handleEntityChange = (id) => {
@@ -299,9 +310,15 @@ const DashboardLayout = () => {
               </button>
               <button
                 onClick={logout}
-                className="px-6 py-3 text-sm font-bold rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                disabled={signingOut}
+                className="px-6 py-3 text-sm font-bold rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 disabled:opacity-70"
               >
-                Confirm
+                {signingOut ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Signing Out...
+                  </>
+                ) : 'Confirm'}
               </button>
             </div>
           </div>
