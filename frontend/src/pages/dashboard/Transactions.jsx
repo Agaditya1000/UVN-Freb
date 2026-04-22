@@ -24,9 +24,10 @@ const AnimatedDropdown = ({ label, value, setValue, options, color }) => {
       </div>
 
       <div
-        className={`absolute left-0 w-full mt-2 bg-surface border border-border rounded-2xl shadow-xl overflow-hidden z-50 transition-all duration-300 ${
-          open ? "max-h-60 opacity-100 scale-100" : "max-h-0 opacity-0 scale-95 pointer-events-none"
+        className={`absolute left-0 w-full mt-2 bg-surface border border-border rounded-2xl shadow-2xl z-50 transition-all duration-300 ${
+          open ? "max-h-60 opacity-100 scale-100 ring-4 ring-primary/5" : "max-h-0 opacity-0 scale-95 pointer-events-none"
         }`}
+        style={{ overflow: open ? 'visible' : 'hidden' }}
       >
         <div className="overflow-y-auto max-h-60">
           {options.map(a => (
@@ -280,7 +281,7 @@ const Transactions = () => {
             if (e.target === e.currentTarget) setShowModal(false);
           }}
         >
-          <div className="bg-surface border border-border p-10 w-full max-w-xl rounded-[3rem] shadow-2xl relative">
+          <div className="bg-surface border border-border p-10 w-full max-w-xl rounded-[3rem] shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
 
 
             <button 
@@ -346,6 +347,9 @@ const Transactions = () => {
                   {loading ? <Loader2 className="animate-spin mx-auto" /> : (modalMode === 'edit' ? 'Save Changes' : 'Post Entry')}
                 </button>
               </div>
+
+              {/* Extra space for dropdowns */}
+              <div className="h-32"></div>
 
             </form>
           </div>
