@@ -50,7 +50,7 @@ function App() {
               element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} 
             >
               <Route index element={<Overview />} />
-              <Route path="business" element={<BusinessSetup />} />
+              <Route path="business" element={<ProtectedRoute allowedRoles={['Owner']}><BusinessSetup /></ProtectedRoute>} />
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="balance-sheet" element={<BalanceSheet />} />

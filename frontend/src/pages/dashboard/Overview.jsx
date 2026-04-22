@@ -21,7 +21,7 @@
               Welcome to the elite financial engine. To begin managing your utilities, you must first establish your business profile.
             </p>
             
-            {userRole === 'Owner' || !userRole ? (
+            {userRole === 'Owner' ? (
               <button 
                 onClick={() => navigate('/dashboard/business')}
                 className="group relative px-10 py-5 bg-primary text-white font-bold rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 overflow-hidden"
