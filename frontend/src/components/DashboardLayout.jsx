@@ -23,8 +23,14 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      setShowConfirm(false);
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      navigate('/', { replace: true });
+    }
   };
 
   const handleEntityChange = (id) => {
